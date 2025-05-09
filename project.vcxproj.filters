@@ -52,6 +52,7 @@
     </ClCompile>
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="MapChip.cpp" />
+    <ClCompile Include="MapEdit.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Screen.h" />
@@ -115,6 +116,7 @@
     </ClInclude>
     <ClInclude Include="Stage.h" />
     <ClInclude Include="MapChip.h" />
+    <ClInclude Include="MapEdit.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Library">

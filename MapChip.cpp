@@ -61,14 +61,16 @@ void MapChip::Draw()
 	{
 		for (int x = 0; x < MAP_CHIP_NUM_X;x++)
 		{	
-			//ƒOƒŠƒbƒh•`‰æ‚µ‚Ä‚¢‚­
-			
-			//cü
-			int verticalLineX = topLeft_x + x * IMAGE_SIZE;
-			DrawLine(verticalLineX, 0, verticalLineX, MAP_CHIP_WIN_HEIGHT, GetColor(255, 255, 255));
-			//‰¡ü‚à
-			int holizontalLineY = y * IMAGE_SIZE;
-			DrawLine(topLeft_x, holizontalLineY, Screen::WIDTH, holizontalLineY, GetColor(255, 255, 255));
+			////ƒOƒŠƒbƒh•`‰æ‚µ‚Ä‚¢‚­
+			//
+			////cü
+			//int verticalLineX = topLeft_x + x * IMAGE_SIZE;
+			//DrawLine(verticalLineX, 0, verticalLineX, MAP_CHIP_WIN_HEIGHT, GetColor(255, 255, 255));
+			////‰¡ü‚à
+			//int holizontalLineY = y * IMAGE_SIZE;
+			//DrawLine(topLeft_x, holizontalLineY, Screen::WIDTH, holizontalLineY, GetColor(255, 255, 255));
+
+
 			int handle = bgHandle[y * MAP_CHIP_NUM_X + x];
 			if (handle != -1)
 			{
