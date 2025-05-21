@@ -55,26 +55,21 @@ void MapChip::Draw()
 	int topLeft_y = 0;
 	int bottomRight_x = Screen::WIDTH;
 	int bottomRight_y = MAP_CHIP_WIN_HEIGHT;
-	DrawBox(topLeft_x, topLeft_y, bottomRight_x, bottomRight_y, GetColor(255, 0, 0), FALSE,3);
-
+	DrawBox(topLeft_x, topLeft_y, bottomRight_x, bottomRight_y, GetColor(255, 0, 0), true,3);
+	int mx = -1, my = -1;
+	GetMousePoint(&mx, &my);
 	for (int y = 0; y < MAP_CHIP_NUM_Y;y++)
 	{
 		for (int x = 0; x < MAP_CHIP_NUM_X;x++)
 		{	
-			////ƒOƒŠƒbƒh•`‰æ‚µ‚Ä‚¢‚­
-			//
-			////cü
-			//int verticalLineX = topLeft_x + x * IMAGE_SIZE;
-			//DrawLine(verticalLineX, 0, verticalLineX, MAP_CHIP_WIN_HEIGHT, GetColor(255, 255, 255));
-			////‰¡ü‚à
-			//int holizontalLineY = y * IMAGE_SIZE;
-			//DrawLine(topLeft_x, holizontalLineY, Screen::WIDTH, holizontalLineY, GetColor(255, 255, 255));
-
-
 			int handle = bgHandle[y * MAP_CHIP_NUM_X + x];
 			if (handle != -1)
 			{
-				DrawGraph(topLeft_x + x * IMAGE_SIZE, y * IMAGE_SIZE, handle, TRUE);
+				DrawGraph(topLeft_x + x * IMAGE_SIZE, y * IMAGE_SIZE, handle, FALSE);
+				if (((mx - topLeft_x ) / IMAGE_SIZE  ) == x && (my / IMAGE_SIZE) == y)
+				{
+					DrawBox(topLeft_x + x * IMAGE_SIZE, y * IMAGE_SIZE, topLeft_x + x * IMAGE_SIZE + IMAGE_SIZE, y * IMAGE_SIZE + IMAGE_SIZE, GetColor(0, 255, 0), false, 5);
+				}
 			}
 		}
 	}

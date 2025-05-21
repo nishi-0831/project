@@ -1,11 +1,12 @@
 #include "PlayScene.h"
 #include <DxLib.h>
-
+#include "../Input.h"
 
 
 PlayScene::PlayScene()
 {
 	stage = new Stage();
+	
 }
 
 PlayScene::~PlayScene()
@@ -14,6 +15,7 @@ PlayScene::~PlayScene()
 
 void PlayScene::Update()
 {
+	Input::KeyStateUpdate();
 	if (CheckHitKey(KEY_INPUT_T)) {
 		SceneManager::ChangeScene("TITLE");
 	}

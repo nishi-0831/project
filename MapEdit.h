@@ -9,8 +9,8 @@ namespace
     const int MAP_HEIGHT = { 20 };
     const int MAP_IMAGE_SIZE = { 32 };
     //ç°ÇÕégÇÌÇ»Ç¢
-    const int LEFT_MERGIN = { 100 };
-    const int TOP_MERGIN = { 40 };
+    const int LEFT_MARGIN = { 100 };
+    const int TOP_MARGIN = { 40 };
 
 }
 class MapEdit :

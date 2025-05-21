@@ -1,5 +1,5 @@
 #include "Stage.h"
-
+#include "Input.h"
 
 //const int IMAGE_SIZE = { 32 };
 //
@@ -66,6 +66,28 @@ Stage::~Stage()
 
 void Stage::Update()
 {
+	if (Input::IsButtonDown(Input::Mouse::LEFT))
+	{
+		DxLib::printfDx("¶‚ª‰Ÿ‚³‚ê‚½uŠÔ!\n");
+	}
+	if (Input::IsButtonKeep(Input::Mouse::LEFT))
+	{
+		//DxLib::printfDx("¶‚ª‰Ÿ‚³‚ê‚Ä‚é\n");
+	}
+	if (Input::IsButtonDown(Input::Mouse::RIGHT))
+	{
+		DxLib::printfDx("‰E‚ª‰Ÿ‚³‚ê‚½uŠÔ!\n");
+	}
+	if (Input::IsButtonUp(Input::Mouse::RIGHT))
+	{
+		DxLib::printfDx("‰E‚ª—£‚³‚ê‚½uŠÔ!\n");
+	}
+	if (Input::IsButtonKeep(Input::Mouse::RIGHT))
+	{
+		//DxLib::printfDx("‰E‚ª‰Ÿ‚³‚ê‚Ä‚¢‚é!\n");
+	}
+
+	
 }
 
 void Stage::Draw()
