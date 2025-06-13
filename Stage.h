@@ -21,6 +21,7 @@ public:
     ~Stage();
     void Update() override;
     void Draw() override;
+    int GetHImage();
 };
 
 //playsceneでstageクラスのインスタンスを作って、
