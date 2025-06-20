@@ -1,6 +1,7 @@
 #include "MapEdit.h"
 #include "DxLib.h"
 #include "ImGui/imgui.h"
+#include <algorithm>
 MapEdit::MapEdit()
 	: GameObject(),myMap_(MAP_WIDTH * MAP_HEIGHT,-1)//初期値を-1で20*20のマップ
 {
@@ -98,6 +99,58 @@ void MapEdit::SetMap(int value)
 
 void MapEdit::GetMap(Point p) const
 {
+}
+
+void MapEdit::Fill(int value)
+{
+	//満たすtileがvalue
+	Point p = { 0,1 };
+	int idx;
+	//checkHImageに該当する隣接したのを消す
+	int checkHImage;
+	if (IsInMapEdit(&p))
+	{
+		idx = p.x + MAP_WIDTH * p.y;
+		checkHImage = myMap_[idx];
+		//myMap_[idx] = value;
+	}
+	else
+	{
+		return;
+	}
+	
+	
+	//FillRecursive(fillHImage, _プレースホルダー_, p);
+}
+
+void MapEdit::FillRecursive(int fillHImage, int checkHImage, Point p)
+{
+	int idx;
+	idx = p.x + MAP_WIDTH * p.y;
+	//クリックした箇所のhImageと、選択中のhImageが一緒ならreturn
+	if (myMap_[idx] == fillHImage)
+	{
+		return;
+	}
+
+	myMap_[idx] = fillHImage;
+
+	////左
+	//FillRecursive(fillHImage, _プレースホルダー_, ToSafeNeighbor(p, Point{ -1,0 }));
+	////右
+	//FillRecursive(fillHImage, _プレースホルダー_, ToSafeNeighbor(p, Point{ 1,0 }));
+	////上
+	//FillRecursive(fillHImage, _プレースホルダー_, ToSafeNeighbor(p, Point{ -MAP_WIDTH,0 }));
+	////下
+	//FillRecursive(fillHImage, _プレースホルダー_, ToSafeNeighbor(p, Point{ MAP_WIDTH,0 }));
+}
+
+Point MapEdit::ToSafeNeighbor(Point start, Point movement)
+{
+	start.x = std::clamp(start.x += movement.x,0,MAP_WIDTH);
+	start.y = std::clamp(start.y += movement.x,0,MAP_HEIGHT);
+
+	return start;
 }
 
 bool MapEdit::IsInMapEdit(Point* p)

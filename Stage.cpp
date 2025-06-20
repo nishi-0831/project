@@ -1,6 +1,6 @@
 #include "Stage.h"
 #include "Input.h"
-
+#include "DxLib.h"
 //const int IMAGE_SIZE = { 32 };
 //
 ////マップのチップ数
@@ -89,6 +89,7 @@ void Stage::Update()
 
 	if (Input::IsButtonKeep(Input::Mouse::LEFT))
 	{
+		
 		int hImage = mapChip_->GetHImage();
 		mapEdit_->SetMap(hImage);
 	}
@@ -99,10 +100,14 @@ void Stage::Update()
 		int hImage = -1;
 		mapEdit_->SetMap(hImage);
 	}
-	/*if (Input::IsButtonDown(Input::Mouse::LEFT))
+	
+	/*if (Input::IsButtonDown(Input::Mouse::RIGHT))
 	{
-		int hImage = mapChip_->GetHImage();
-		mapEdit_->SetMap(hImage);
+		if (Input::IsKeepKeyDown(KEY_INPUT_LSHIFT))
+		{
+			int hImage = -1;
+			mapEdit_->Fill(hImage);
+		}
 	}*/
 }
 

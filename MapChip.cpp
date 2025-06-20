@@ -6,6 +6,7 @@
 #include <assert.h>
 #include "Input.h"
 #include "MapEdit.h"
+#include <algorithm>
 #define test 0
 
 namespace
@@ -18,9 +19,15 @@ namespace
 	//マップのチップ数
 	
 	//マップチップウィンドウの並び数
+
+#if 0
 	const int MAP_CHIP_NUM_X = { 8 };
 	const int MAP_CHIP_NUM_Y = { 24 };
-
+#else
+	const int MAP_CHIP_NUM_X = { MAP_CHIP_WIDTH };
+	const int MAP_CHIP_NUM_Y = { MAP_CHIP_HEIGHT };
+#endif
+	
 	//縦
 	const int MAP_CHIP_WIN_WIDTH = { IMAGE_SIZE * MAP_CHIP_NUM_X };
 	const int MAP_CHIP_WIN_HEIGHT = { IMAGE_SIZE * MAP_CHIP_NUM_Y};
@@ -39,15 +46,30 @@ namespace
 		std::vector<int> hImages;
 	};*/
 	//BgHandle bgHandleMap;
+	Rect defaultMapChipArea_;
+}
+void MapChip::Input()
+{
+
+	int dir=0;
+	if (Input::IsKeyDown(KEY_INPUT_D))
+	{
+		//tipOffset_ += 1;
+		dir = 1;
+	}
+	if (Input::IsKeyDown(KEY_INPUT_A))
+	{
+		//tipOffset_ -= 1;
+		dir = -1;
+	}
+	mapChipArea_.x = std::clamp(mapChipArea_.x+(dir * IMAGE_SIZE), Screen::WIDTH - MAP_CHIP_WIN_WIDTH, Screen::WIDTH);
 }
 MapChip::MapChip()
 	: GameObject()
 {
-	//bgHandle = std::vector<int>(MAP_CHIP_HEIGHT * MAP_CHIP_WIDTH, -1);
 	bgHandle.resize(MAP_CHIP_WIDTH * MAP_CHIP_HEIGHT);
-	//bgHandleMap.index.resize(MAP_CHIP_WIDTH * MAP_CHIP_HEIGHT);
-	//bgHandleMap.hImages.resize(MAP_CHIP_WIDTH * MAP_CHIP_HEIGHT);
 
+	tipOffset_ = 0;
 	int a = LoadGraph("bg.png", 0);
 	LoadDivGraph("bg.png", 
 		MAP_CHIP_WIDTH * MAP_CHIP_HEIGHT, 
@@ -61,12 +83,15 @@ MapChip::MapChip()
 	int bottomRight_x = Screen::WIDTH;
 	int bottomRight_y = MAP_CHIP_WIN_HEIGHT;
 
-	mapChipArea_ = {
+	
+	defaultMapChipArea_ = {
 	Screen::WIDTH - MAP_CHIP_WIN_WIDTH,
 	0,
-	Screen::WIDTH,
+	MAP_CHIP_WIN_WIDTH,
 	 MAP_CHIP_WIN_HEIGHT
 	};
+	
+	mapChipArea_ = defaultMapChipArea_;
 
 	for (int i = 0;i < bgHandle.size();i++)
 	{
@@ -106,6 +131,8 @@ MapChip::~MapChip()
 
 void MapChip::Update()
 {
+	Input();
+	
 	Point mousePos;
 	if (GetMousePoint(&mousePos.x , &mousePos.y) == -1)
 	{
@@ -129,11 +156,8 @@ void MapChip::Update()
 		{
 			//int index = point.y * MAP_CHIP_NUM_X + point.x;
 			selectedChip.first = point;
-#if test
-			selectedChip.second = bgHandleMap[point];
-#else
 			selectedChip.second = bgHandleMap[point.y * MAP_CHIP_NUM_X + point.x];
-#endif
+
 		}
 		
 		
@@ -149,11 +173,7 @@ void MapChip::Draw()
 	
 	for (const auto bg : bgHandleMap)
 	{
-#if test
-		ImGui::Text("bgHandleMap[%d,%d] = %d", bg.first.x, bg.first.y, bg.second);
-#else
 		ImGui::Text("bgHandleMap[%d] = %d", bg.first, bg.second);
-#endif
 	}
 	ImGui::EndChild();
 
@@ -163,10 +183,14 @@ void MapChip::Draw()
 	{
 		for (int x = 0; x < MAP_CHIP_NUM_X;x++)
 		{
-			int handle = bgHandle[y * MAP_CHIP_NUM_X + x];
+			//tipOffset_を加えた
+			int handle = bgHandle[y * MAP_CHIP_NUM_X + (x)];
+
+			//bgHandleの範囲外にアクセスしてしまう
+			//int handle = bgHandle[y * MAP_CHIP_NUM_X + (x + tipOffset_)];
 			if (handle != -1)
 			{
-				DrawGraph(mapChipArea_.x + x * IMAGE_SIZE, y * IMAGE_SIZE, handle, FALSE);
+				DrawGraph(mapChipArea_.x + (x+tipOffset_) * IMAGE_SIZE, y * IMAGE_SIZE, handle, FALSE);
 			}
 		}
 	}
@@ -249,6 +273,7 @@ bool MapChip::IsInMapChipArea(Point* point)
 			if (handle != -1)
 			{
 				if (((mx - mapChipArea_.x) / IMAGE_SIZE) == x && (my / IMAGE_SIZE) == y)
+				//if (((mx - mapChipArea_.x) / IMAGE_SIZE) == x + tipOffset_ && (my / IMAGE_SIZE) == y)
 				{		
 					point->x = x;
 					point->y = y;
