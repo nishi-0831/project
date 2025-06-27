@@ -2,6 +2,15 @@
 #include "DxLib.h"
 #include "ImGui/imgui.h"
 #include <algorithm>
+#include "Input.h"
+#include <fstream>
+#include <map>
+
+namespace
+{
+	std::map<int, int> myMapMap;
+}
+#define flag 1
 MapEdit::MapEdit()
 	: GameObject(),myMap_(MAP_WIDTH * MAP_HEIGHT,-1)//初期値を-1で20*20のマップ
 {
@@ -26,7 +35,10 @@ MapEdit::~MapEdit()
 
 void MapEdit::Update()
 {
-
+	if (Input::IsKeyDown(KEY_INPUT_S))
+	{
+		SaveMapData();
+	}
 }
 
 void MapEdit::Draw()
@@ -103,52 +115,58 @@ void MapEdit::GetMap(Point p) const
 
 void MapEdit::Fill(int value)
 {
+#if flag
 	//満たすtileがvalue
 	Point p = { 0,1 };
 	int idx;
-	//checkHImageに該当する隣接したのを消す
+	//近傍にあるcheckHImageに該当するのを消す
 	int checkHImage;
 	if (IsInMapEdit(&p))
 	{
 		idx = p.x + MAP_WIDTH * p.y;
+		//押した箇所のHIage
 		checkHImage = myMap_[idx];
-		//myMap_[idx] = value;
 	}
 	else
 	{
 		return;
 	}
-	
-	
-	//FillRecursive(fillHImage, _プレースホルダー_, p);
+	FillRecursive(value, checkHImage, p);
+#endif
 }
 
 void MapEdit::FillRecursive(int fillHImage, int checkHImage, Point p)
 {
+#if flag
 	int idx;
-	idx = p.x + MAP_WIDTH * p.y;
+	idx = p.x + (MAP_WIDTH * p.y);
 	//クリックした箇所のhImageと、選択中のhImageが一緒ならreturn
 	if (myMap_[idx] == fillHImage)
 	{
 		return;
 	}
-
+	//その箇所のhImageが現在塗りつぶし対象と異なるならreturn
+	if (myMap_[idx] != checkHImage)
+	{
+		return;
+	}
 	myMap_[idx] = fillHImage;
 
 	////左
-	//FillRecursive(fillHImage, _プレースホルダー_, ToSafeNeighbor(p, Point{ -1,0 }));
+	FillRecursive(fillHImage, checkHImage, ToSafeNeighbor(p, Point{ -1,0 }));
 	////右
-	//FillRecursive(fillHImage, _プレースホルダー_, ToSafeNeighbor(p, Point{ 1,0 }));
+	FillRecursive(fillHImage, checkHImage, ToSafeNeighbor(p, Point{ 1,0 }));
 	////上
-	//FillRecursive(fillHImage, _プレースホルダー_, ToSafeNeighbor(p, Point{ -MAP_WIDTH,0 }));
+	FillRecursive(fillHImage, checkHImage, ToSafeNeighbor(p, Point{ 0,-1 }));
 	////下
-	//FillRecursive(fillHImage, _プレースホルダー_, ToSafeNeighbor(p, Point{ MAP_WIDTH,0 }));
+	FillRecursive(fillHImage, checkHImage, ToSafeNeighbor(p, Point{ 0,1 }));
+#endif
 }
 
 Point MapEdit::ToSafeNeighbor(Point start, Point movement)
 {
-	start.x = std::clamp(start.x += movement.x,0,MAP_WIDTH);
-	start.y = std::clamp(start.y += movement.x,0,MAP_HEIGHT);
+	start.x = std::clamp(start.x += movement.x,0,MAP_WIDTH -1);
+	start.y = std::clamp(start.y += movement.y,0,MAP_HEIGHT -1);
 
 	return start;
 }
@@ -179,4 +197,39 @@ bool MapEdit::IsInMapEdit(Point* p)
 		}
 		return ret;
 	
+}
+
+void MapEdit::SaveMapData()
+{
+	printfDx("File Saved!!!\n");
+	//出力のファイル
+	//出力につながる流れ?
+	std::ofstream	file("data.dat");
+	/*for (auto& tile : myMap_)
+	{
+		file << tile << " ";
+		file << std::endl;
+	}*/
+	//file << "data1" << " " << "data2" << std::endl;
+	file << "#header" << std::endl;
+	file << "WIDTH " << MAP_WIDTH << std::endl;
+	file << "HEIGHT " << MAP_HEIGHT << std::endl;
+	file << std::endl;
+	file << "#data" <<std::endl;
+
+	for (int y = 0; y < MAP_HEIGHT;y++)
+	{
+		
+		for (int x = 0; x < MAP_WIDTH;x++)
+		{
+			int handle = myMap_[y * MAP_WIDTH + x];
+			//ImGui::Text("myMap(%d,%d):%d", x, y, handle);
+			file <<handle << ",";
+			
+		}
+		file << std::endl;
+	}
+
+	
+	file.close();
 }

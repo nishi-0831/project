@@ -86,14 +86,28 @@ void Stage::Update()
 	{
 		//DxLib::printfDx("右が押されている!\n");
 	}
-
+	if (Input::IsButtonDown(Input::Mouse::LEFT))
+	{
+		if (Input::IsKeepKeyDown(KEY_INPUT_LSHIFT))
+		{
+			int hImage = mapChip_->GetHImage();
+			mapEdit_->Fill(hImage);
+		}
+	}
 	if (Input::IsButtonKeep(Input::Mouse::LEFT))
 	{
 		
 		int hImage = mapChip_->GetHImage();
 		mapEdit_->SetMap(hImage);
 	}
-
+	if (Input::IsButtonDown(Input::Mouse::RIGHT))
+	{
+		if (Input::IsKeepKeyDown(KEY_INPUT_LSHIFT))
+		{
+			int hImage = -1;
+			mapEdit_->Fill(hImage);
+		}
+	}
 	//消しゴム的な機能
 	if (Input::IsButtonKeep(Input::Mouse::RIGHT))
 	{
@@ -101,14 +115,7 @@ void Stage::Update()
 		mapEdit_->SetMap(hImage);
 	}
 	
-	/*if (Input::IsButtonDown(Input::Mouse::RIGHT))
-	{
-		if (Input::IsKeepKeyDown(KEY_INPUT_LSHIFT))
-		{
-			int hImage = -1;
-			mapEdit_->Fill(hImage);
-		}
-	}*/
+	
 }
 
 void Stage::Draw()

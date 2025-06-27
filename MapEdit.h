@@ -27,9 +27,12 @@ public:
     void Draw() override;
     void SetMap(int value);
     void GetMap(Point p) const;
+    //value‚Å–ž‚½‚·
     void Fill(int value);
     void FillRecursive(int fillHImage, int checkHImage, Point p);
     Point ToSafeNeighbor(Point start, Point movement);
     bool IsInMapEdit(Point* p);
+
+    void SaveMapData();
 };
 

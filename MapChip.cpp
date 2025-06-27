@@ -47,6 +47,8 @@ namespace
 	};*/
 	//BgHandle bgHandleMap;
 	Rect defaultMapChipArea_;
+
+
 }
 void MapChip::Input()
 {
@@ -70,6 +72,14 @@ MapChip::MapChip()
 	bgHandle.resize(MAP_CHIP_WIDTH * MAP_CHIP_HEIGHT);
 
 	tipOffset_ = 0;
+	const char* FileName = "bg.png";
+	int AllNum = MAP_CHIP_WIDTH * MAP_CHIP_HEIGHT;
+	int XNum = MAP_CHIP_WIDTH; 
+	int YNum = MAP_CHIP_HEIGHT;
+	int XSize = IMAGE_SIZE;
+	int YSize = IMAGE_SIZE;
+	//int HandleBuf*
+
 	int a = LoadGraph("bg.png", 0);
 	LoadDivGraph("bg.png", 
 		MAP_CHIP_WIDTH * MAP_CHIP_HEIGHT, 

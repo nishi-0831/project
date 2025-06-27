@@ -1,7 +1,8 @@
 #pragma once
+#include <functional>
+#include <vector>
 
-namespace
-{
+
 
 
 	//二次元ベクトル(整数)
@@ -14,7 +15,24 @@ namespace
 		{
 			return (x + x * y < rhs.x + rhs.x * rhs.y);
 		}
+		bool operator==(const Point& other)const
+		{
+			return (x == other.x && y == other.y);
+		}
 	};
+
+	namespace std
+	{
+		template<>
+		struct hash<Point>
+		{
+			size_t operator()(const Point& p) const
+			{
+				//例えば(18,0)と(0,18)が同じハッシュ値にならないように
+				return hash<int>()(p.x) ^ (hash<int>()(p.y) << 1);
+			}
+		};
+	}
 
 	inline Point Add(Point a, Point b)
 	{
@@ -57,8 +75,8 @@ namespace
 			{0,0}
 	};
 
-
-
+namespace
+{
 	const int CHA_SIZE = 32;//キャラクターのサイズ
 
 	const int STAGE_WIDTH = 39;
