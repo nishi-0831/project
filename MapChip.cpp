@@ -73,6 +73,7 @@ void MapChip::Input()
 MapChip::MapChip()
 	: GameObject()
 {
+	selectedChip.second = -1;
 	bgHandle.resize(MAP_CHIP_WIDTH * MAP_CHIP_HEIGHT);
 
 	tipOffset_ = 0;
