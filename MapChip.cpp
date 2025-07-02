@@ -170,7 +170,7 @@ void MapChip::Update()
 		if (IsInMapChipArea(&point))
 		{
 			//int index = point.y * MAP_CHIP_NUM_X + point.x;
-			selectedChip.first = point;
+			selectedChip.first = Point{ point.x + tipOffset_,point.y };
 			selectedChip.second = bgHandleMap[point.y * MAP_CHIP_WIDTH +( point.x + tipOffset_)];
 
 		}
@@ -322,14 +322,9 @@ int MapChip::GetHImage()
 
 int MapChip::GetChipIndex(int handle)
 {
-#if 0
-	for (int i = 0; i < bgHandle.size(); i++)
-	{
-		if (handle == bgHandle[i])
-		{
-			return i;
-		}
-	}
+#if 1
+	
+	return bgChipIndexMap[handle];
 #else
 	auto itr = bgChipIndexMap.find(handle);
 	if (itr != bgChipIndexMap.end())
@@ -341,6 +336,6 @@ int MapChip::GetChipIndex(int handle)
 		return -1;
 	}
 #endif
-	return -1;
+	
 }
 

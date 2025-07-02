@@ -6,6 +6,7 @@
 #include <fstream>
 #include <map>
 #include "MapChip.h"
+#include <Windows.h>
 
 namespace
 {
@@ -225,8 +226,12 @@ void MapEdit::SaveMapData()
 		
 		for (int x = 0; x < MAP_WIDTH;x++)
 		{
+			int index = -1;
 			int handle = myMap_[y * MAP_WIDTH + x];
-			int index = mc->GetChipIndex(handle);
+			if (handle != -1)
+			{
+				index = mc->GetChipIndex(handle);
+			}
 			//ImGui::Text("myMap(%d,%d):%d", x, y, handle);
 			file <<index << ",";
 		}
