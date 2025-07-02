@@ -66,6 +66,7 @@ Stage::~Stage()
 
 void Stage::Update()
 {
+#if 0
 	if (Input::IsButtonDown(Input::Mouse::LEFT))
 	{
 		DxLib::printfDx("¶‚ª‰Ÿ‚³‚ê‚½uŠÔ!\n");
@@ -86,6 +87,7 @@ void Stage::Update()
 	{
 		//DxLib::printfDx("‰E‚ª‰Ÿ‚³‚ê‚Ä‚¢‚é!\n");
 	}
+#endif
 	if (Input::IsButtonDown(Input::Mouse::LEFT))
 	{
 		if (Input::IsKeepKeyDown(KEY_INPUT_LSHIFT))

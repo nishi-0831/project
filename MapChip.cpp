@@ -24,7 +24,7 @@ namespace
 	const int MAP_CHIP_NUM_X = { 8 };
 	const int MAP_CHIP_NUM_Y = { 24 };
 #else
-	const int MAP_CHIP_NUM_X = { MAP_CHIP_WIDTH };
+	const int MAP_CHIP_NUM_X = { 8 };
 	const int MAP_CHIP_NUM_Y = { MAP_CHIP_HEIGHT };
 #endif
 	
@@ -37,6 +37,7 @@ namespace
 
 #else
 	std::map<int, int> bgHandleMap;
+	std::map<int, int> bgChipIndexMap;
 #endif
 	std::pair<Point, int> selectedChip;
 	//std::pair<int, int> selectedChip;
@@ -56,15 +57,15 @@ void MapChip::Input()
 	int dir=0;
 	if (Input::IsKeyDown(KEY_INPUT_D))
 	{
-		//tipOffset_ += 1;
+		tipOffset_ += 1;
 		dir = 1;
 	}
 	if (Input::IsKeyDown(KEY_INPUT_A))
 	{
-		//tipOffset_ -= 1;
+		tipOffset_ -= 1;
 		dir = -1;
 	}
-	mapChipArea_.x = std::clamp(mapChipArea_.x+(dir * IMAGE_SIZE), Screen::WIDTH - MAP_CHIP_WIN_WIDTH, Screen::WIDTH);
+	//mapChipArea_.x = std::clamp(mapChipArea_.x+(dir * IMAGE_SIZE), Screen::WIDTH - MAP_CHIP_WIN_WIDTH, Screen::WIDTH);
 }
 MapChip::MapChip()
 	: GameObject()
@@ -114,6 +115,7 @@ MapChip::MapChip()
 		bgHandleMap.insert(std::make_pair(Point{x,y}, bgHandle[i]));
 #else
 		bgHandleMap.insert(std::make_pair(i, bgHandle[i]));
+		bgChipIndexMap.insert(std::make_pair(bgHandle[i], i));
 #endif
 		
 	}
@@ -298,5 +300,29 @@ bool MapChip::IsInMapChipArea(Point* point)
 int MapChip::GetHImage()
 {
 	return selectedChip.second;
+}
+
+int MapChip::GetChipIndex(int handle)
+{
+#if 0
+	for (int i = 0; i < bgHandle.size(); i++)
+	{
+		if (handle == bgHandle[i])
+		{
+			return i;
+		}
+	}
+#else
+	auto itr = bgChipIndexMap.find(handle);
+	if (itr != bgChipIndexMap.end())
+	{
+		return bgChipIndexMap[handle];
+	}
+	else
+	{
+		return -1;
+	}
+#endif
+	return -1;
 }
 

@@ -5,10 +5,11 @@
 #include "Input.h"
 #include <fstream>
 #include <map>
+#include "MapChip.h"
 
 namespace
 {
-	std::map<int, int> myMapMap;
+	//std::map<int, int> myMapMap;
 }
 #define flag 1
 MapEdit::MapEdit()
@@ -217,15 +218,17 @@ void MapEdit::SaveMapData()
 	file << std::endl;
 	file << "#data" <<std::endl;
 
+	MapChip* mc = FindGameObject<MapChip>();
+
 	for (int y = 0; y < MAP_HEIGHT;y++)
 	{
 		
 		for (int x = 0; x < MAP_WIDTH;x++)
 		{
 			int handle = myMap_[y * MAP_WIDTH + x];
+			int index = mc->GetChipIndex(handle);
 			//ImGui::Text("myMap(%d,%d):%d", x, y, handle);
-			file <<handle << ",";
-			
+			file <<index << ",";
 		}
 		file << std::endl;
 	}

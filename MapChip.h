@@ -26,5 +26,6 @@ public:
 	bool IsInMapChipArea(Point* point);
 	//void File()
 	int GetHImage();
+	int GetChipIndex(int handle);
 };
 
