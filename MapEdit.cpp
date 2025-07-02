@@ -203,41 +203,67 @@ bool MapEdit::IsInMapEdit(Point* p)
 
 void MapEdit::SaveMapData()
 {
-	printfDx("File Saved!!!\n");
-	//出力のファイル
-	//出力につながる流れ?
-	std::ofstream	file("data.dat");
-	/*for (auto& tile : myMap_)
-	{
-		file << tile << " ";
-		file << std::endl;
-	}*/
-	//file << "data1" << " " << "data2" << std::endl;
-	file << "#header" << std::endl;
-	file << "WIDTH " << MAP_WIDTH << std::endl;
-	file << "HEIGHT " << MAP_HEIGHT << std::endl;
-	file << std::endl;
-	file << "#data" <<std::endl;
+	//頑張ってファイル選択ダイアログを出す
+	TCHAR filename[255] = "";
+	OPENFILENAME ofn = { 0 };
 
-	MapChip* mc = FindGameObject<MapChip>();
+	ofn.lStructSize = sizeof(ofn);
+	//ウィンドウのオーナー=親ウィンドウのハンドル
+	
+	ofn.hwndOwner = GetMainWindowHandle();
+	ofn.lpstrFilter = "全てのファイル (*.*)\0*.*\0";
+	ofn.lpstrFile = filename;
+	ofn.nMaxFile = 255;
+	ofn.Flags = OFN_OVERWRITEPROMPT;
 
-	for (int y = 0; y < MAP_HEIGHT;y++)
-	{
-		
-		for (int x = 0; x < MAP_WIDTH;x++)
-		{
-			int index = -1;
-			int handle = myMap_[y * MAP_WIDTH + x];
-			if (handle != -1)
-			{
-				index = mc->GetChipIndex(handle);
-			}
-			//ImGui::Text("myMap(%d,%d):%d", x, y, handle);
-			file <<index << ",";
-		}
-		file << std::endl;
-	}
+	//ただファイル選択ダイアログが表示されるだけで、保存ボタンとか押してもなんも起きないよ
 
 	
-	file.close();
+	//ファイル名はlpstrFileに渡したfilenameに入ってる
+	if (GetSaveFileName(&ofn))
+	{
+		printfDx("ファイルが選択された\n");
+		//ファイルを開いて、セーブ
+		//std::filesystem ファイル名だけ取り出す
+		//それからofstreamを開く
+		std::ofstream openfile(filename);
+
+
+
+		printfDx("File Saved!!!\n");
+		//出力結果のファイル
+		//std::ofstream	file("data.dat");
+
+		openfile << "#header" << std::endl;
+		openfile << "WIDTH " << MAP_WIDTH << std::endl;
+		openfile << "HEIGHT " << MAP_HEIGHT << std::endl;
+		openfile << std::endl;
+		openfile << "#data" << std::endl;
+
+		MapChip* mc = FindGameObject<MapChip>();
+
+		for (int y = 0; y < MAP_HEIGHT;y++)
+		{
+
+			for (int x = 0; x < MAP_WIDTH;x++)
+			{
+				int index = -1;
+				int handle = myMap_[y * MAP_WIDTH + x];
+				if (handle != -1)
+				{
+					index = mc->GetChipIndex(handle);
+				}
+				//ImGui::Text("myMap(%d,%d):%d", x, y, handle);
+				openfile << index << ",";
+			}
+			openfile << std::endl;
+		}
+		openfile.close();
+	}
+	else
+	{
+		//ファイルの選択がキャンセル
+		printfDx("セーブがキャンセル\n");
+	}
+	
 }
