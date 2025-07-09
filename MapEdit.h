@@ -30,9 +30,13 @@ public:
     //valueで満たす
     void Fill(int value);
     void FillRecursive(int fillHImage, int checkHImage, Point p);
+    //マウスで作った矩形の範囲を満たす
+    void RectFill(int value);
     Point ToSafeNeighbor(Point start, Point movement);
     bool IsInMapEdit(Point* p);
 
     void SaveMapData();
+    
+    void LoadMapData();
 };
 

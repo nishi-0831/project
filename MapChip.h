@@ -27,5 +27,6 @@ public:
 	//void File()
 	int GetHImage();
 	int GetChipIndex(int handle);
+	int GetChipHandle(int index);
 };
 

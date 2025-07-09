@@ -7,14 +7,18 @@
 #include <map>
 #include "MapChip.h"
 #include <Windows.h>
-
+#include <iostream>
+#include <sstream>
+#include <string>
 namespace
 {
 	//std::map<int, int> myMapMap;
+	Point down;
+	Point up;
 }
 #define flag 1
 MapEdit::MapEdit()
-	: GameObject(),myMap_(MAP_WIDTH * MAP_HEIGHT,-1)//初期値を-1で20*20のマップ
+	: GameObject(), myMap_(MAP_WIDTH* MAP_HEIGHT, -1)//初期値を-1で20*20のマップ
 {
 	//mapChipArea_ = {
 	/*Screen::WIDTH - MAP_CHIP_WIN_WIDTH,
@@ -26,7 +30,7 @@ MapEdit::MapEdit()
 		LEFT_MARGIN,
 		TOP_MARGIN,
 		MAP_IMAGE_SIZE * MAP_WIDTH + LEFT_MARGIN,
-		MAP_IMAGE_SIZE * MAP_HEIGHT+TOP_MARGIN
+		MAP_IMAGE_SIZE * MAP_HEIGHT + TOP_MARGIN
 	};
 }
 
@@ -41,18 +45,23 @@ void MapEdit::Update()
 	{
 		SaveMapData();
 	}
+	if (Input::IsKeyDown(KEY_INPUT_L))
+	{
+		LoadMapData();
+	}
+	//if(Input::IsButtonUp(Mou))
 }
 
 void MapEdit::Draw()
 {
-	
+
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
 
 	int topLeftX = 0 + LEFT_MARGIN;
 	int topLeftY = 0 + TOP_MARGIN;
 	int bottomLightX = MAP_IMAGE_SIZE * MAP_WIDTH + LEFT_MARGIN;
 	int bottomLightY = MAP_IMAGE_SIZE * MAP_HEIGHT + TOP_MARGIN;
-	DrawBox(topLeftX, topLeftY, bottomLightX-1, bottomLightY-1, GetColor(122, 122, 122), FALSE,3);
+	DrawBox(topLeftX, topLeftY, bottomLightX - 1, bottomLightY - 1, GetColor(122, 122, 122), FALSE, 3);
 
 	for (int i = 1;i < MAP_WIDTH;i++)
 	{
@@ -91,7 +100,6 @@ void MapEdit::Draw()
 			ImGui::Text("myMap(%d,%d):%d", x, y, handle);
 			if (handle != -1)
 			{
-				
 				DrawGraph(mapEditArea_.x + x * IMAGE_SIZE, mapEditArea_.y + y * IMAGE_SIZE, handle, FALSE);
 			}
 		}
@@ -165,10 +173,49 @@ void MapEdit::FillRecursive(int fillHImage, int checkHImage, Point p)
 #endif
 }
 
+
+void MapEdit::RectFill(int value)
+{
+	//押し込んだ時の座標と、離した時の座標で矩形を作る
+	Point downPos = Point{0,0};
+	Point upPos = Point{1000,1000};
+
+	//小さい値を左/上とする
+	Rect rect;
+
+	///x
+
+	//押し込んだ時のxが左
+	if (downPos.x < upPos.x)
+	{
+		rect.x = downPos.x;
+		rect.w = upPos.x - downPos.x;
+	}
+	//離した時
+	else
+	{
+		rect.x = upPos.x - downPos.x;
+		rect.w = downPos.x;
+	}
+
+	///y
+	if (downPos.y < upPos.y)
+	{
+		rect.y = downPos.y;
+		rect.h = upPos.y - downPos.y;
+	}
+	//離した時
+	else
+	{
+		rect.y = upPos.y - downPos.y;
+		rect.h = downPos.y;
+	}
+}
+
 Point MapEdit::ToSafeNeighbor(Point start, Point movement)
 {
-	start.x = std::clamp(start.x += movement.x,0,MAP_WIDTH -1);
-	start.y = std::clamp(start.y += movement.y,0,MAP_HEIGHT -1);
+	start.x = std::clamp(start.x += movement.x, 0, MAP_WIDTH - 1);
+	start.y = std::clamp(start.y += movement.y, 0, MAP_HEIGHT - 1);
 
 	return start;
 }
@@ -176,29 +223,29 @@ Point MapEdit::ToSafeNeighbor(Point start, Point movement)
 bool MapEdit::IsInMapEdit(Point* p)
 {
 	const int IMAGE_SIZE = { 32 };
-	
-		bool ret = false;
 
-		int mx = -1, my = -1;
-		GetMousePoint(&mx, &my);
-		for (int y = 0; y < MAP_HEIGHT;y++)
+	bool ret = false;
+
+	int mx = -1, my = -1;
+	GetMousePoint(&mx, &my);
+	for (int y = 0; y < MAP_HEIGHT;y++)
+	{
+		for (int x = 0; x < MAP_WIDTH;x++)
 		{
-			for (int x = 0; x < MAP_WIDTH;x++)
+
+			int touchX = (mx - mapEditArea_.x) / MAP_IMAGE_SIZE;
+			int touchY = (my - mapEditArea_.y) / MAP_IMAGE_SIZE;
+			if ((touchX == x) && (touchY == y))
 			{
-				
-				int touchX= (mx - mapEditArea_.x) / MAP_IMAGE_SIZE;
-				int touchY= (my - mapEditArea_.y) / MAP_IMAGE_SIZE;
-					if ((touchX == x) && (touchY == y ))
-					{
-						p->x = x;
-						p->y = y;
-						ret = true;
-					}
-				
+				p->x = x;
+				p->y = y;
+				ret = true;
 			}
+
 		}
-		return ret;
-	
+	}
+	return ret;
+
 }
 
 void MapEdit::SaveMapData()
@@ -209,7 +256,7 @@ void MapEdit::SaveMapData()
 
 	ofn.lStructSize = sizeof(ofn);
 	//ウィンドウのオーナー=親ウィンドウのハンドル
-	
+
 	ofn.hwndOwner = GetMainWindowHandle();
 	ofn.lpstrFilter = "全てのファイル (*.*)\0*.*\0";
 	ofn.lpstrFile = filename;
@@ -218,7 +265,7 @@ void MapEdit::SaveMapData()
 
 	//ただファイル選択ダイアログが表示されるだけで、保存ボタンとか押してもなんも起きないよ
 
-	
+
 	//ファイル名はlpstrFileに渡したfilenameに入ってる
 	if (GetSaveFileName(&ofn))
 	{
@@ -231,14 +278,14 @@ void MapEdit::SaveMapData()
 
 
 		printfDx("File Saved!!!\n");
+
+		std::ofstream file("data.dat");
+
+		openfile << "#TinyMapData\n";
 		//出力結果のファイル
 		//std::ofstream	file("data.dat");
 
-		openfile << "#header" << std::endl;
-		openfile << "WIDTH " << MAP_WIDTH << std::endl;
-		openfile << "HEIGHT " << MAP_HEIGHT << std::endl;
-		openfile << std::endl;
-		openfile << "#data" << std::endl;
+
 
 		MapChip* mc = FindGameObject<MapChip>();
 
@@ -254,7 +301,13 @@ void MapEdit::SaveMapData()
 					index = mc->GetChipIndex(handle);
 				}
 				//ImGui::Text("myMap(%d,%d):%d", x, y, handle);
-				openfile << index << ",";
+				
+				openfile << index;
+				//openfile << index << ",";
+				if (x != MAP_WIDTH - 1)
+				{
+					openfile << ",";
+				}
 			}
 			openfile << std::endl;
 		}
@@ -265,5 +318,126 @@ void MapEdit::SaveMapData()
 		//ファイルの選択がキャンセル
 		printfDx("セーブがキャンセル\n");
 	}
+
+}
+
+void MapEdit::LoadMapData()
+{
+	//頑張ってファイル選択ダイアログを出す
+	TCHAR filename[255] = "";
+	OPENFILENAME ifn = { 0 };
+
+	ifn.lStructSize = sizeof(ifn);
+	//ウィンドウのオーナー=親ウィンドウのハンドル
+
+	ifn.hwndOwner = GetMainWindowHandle();
+	ifn.lpstrFilter = "全てのファイル (*.*)\0*.*\0";
+	ifn.lpstrFile = filename;
+	ifn.nMaxFile = 255;
+	//ifn.Flags = OFN_OVERWRITEPROMPT;
+
+	//ただファイル選択ダイアログが表示されるだけで、保存ボタンとか押してもなんも起きないよ
+
 	
+	//ファイル名はlpstrFileに渡したfilenameに入ってる
+	if (GetOpenFileName(&ifn))
+	{
+		printfDx("ファイルが選択された\n", filename);
+		//ファイルを開いて、セーブ
+		//std::filesystem ファイル名だけ取り出す
+		//ifstreamを開く input file stream
+		std::ifstream inputfile(filename);
+		if (!inputfile)
+		{
+			std::cerr << "ファイルを開けませんでした。" << std::endl;
+		}
+		//inputfileの中に読み込んだ文字列あるよ
+		std::string str_buf;
+
+		if (inputfile.is_open())
+		{
+			MapChip* mc = FindGameObject<MapChip>();
+			if (getline(inputfile, str_buf))
+			{
+				
+				if (str_buf != "#TinyMapData")
+				{
+					printfDx("無効なファイルだと思います");
+					return;
+				}
+			}
+			//std::cerr << "error: failed to open file " << std::endl;
+			//一行ずつ
+			myMap_.clear();
+			while (getline(inputfile, str_buf))
+			{
+				
+#if 1
+				//コンマ区切りで読み込みてえな
+				std::string data;
+				//std::istringstream stream(str_buf);
+
+				std::stringstream sstream(str_buf);
+
+				while (getline(sstream, data, ','))
+				{
+					int num;
+					num = std::stoi(data);
+					//printfDx("%i",num);
+					//printfDx(" ");
+					myMap_.push_back(mc->GetChipHandle(num));
+				}
+#else
+				if (str_buf.empty()) continue;
+				if (str_buf[0] != '#')
+				{
+					std::istringstream iss(str_buf);
+					int tmp;
+					while (iss >> tmp)
+					{
+
+						myMap_.push_back(mc->GetChipHandle(tmp));
+					}
+				}
+#endif
+				printfDx("\n");
+			}
+			//printfDx("File Saved!!!\n");
+			//出力結果のファイル
+			//std::ofstream	file("data.dat");
+		}
+#if 0
+		inputfile << "#header" << std::endl;
+		inputfile << "WIDTH " << MAP_WIDTH << std::endl;
+		inputfile << "HEIGHT " << MAP_HEIGHT << std::endl;
+		inputfile << std::endl;
+		inputfile << "#data" << std::endl;
+
+		MapChip* mc = FindGameObject<MapChip>();
+
+		for (int y = 0; y < MAP_HEIGHT;y++)
+		{
+
+			for (int x = 0; x < MAP_WIDTH;x++)
+			{
+				int index = -1;
+				int handle = myMap_[y * MAP_WIDTH + x];
+				if (handle != -1)
+				{
+					index = mc->GetChipIndex(handle);
+				}
+				//ImGui::Text("myMap(%d,%d):%d", x, y, handle);
+				inputfile << index << ",";
+			}
+			inputfile << std::endl;
+		}
+		inputfile.close();
+	}
+	else
+	{
+		//ファイルの選択がキャンセル
+		printfDx("セーブがキャンセル\n");
+	}
+#endif
+	}
 }

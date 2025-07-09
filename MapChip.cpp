@@ -340,3 +340,10 @@ int MapChip::GetChipIndex(int handle)
 	
 }
 
+int MapChip::GetChipHandle(int index)
+{
+	//存在しないキーを渡されるとそれに対応する値は値初期化されたものになる。
+	//これはintなので0になるっぽい。
+	return bgHandleMap[index];
+}
+
