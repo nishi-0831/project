@@ -57,7 +57,7 @@ namespace
 }
 void MapChip::Input()
 {
-#if 0
+#if 1
 	int dir=0;
 	if (Input::IsKeyDown(KEY_INPUT_D))
 	{
@@ -252,7 +252,17 @@ void MapChip::Draw()
 	{
 		DrawBox(mapChipArea_.x + point.x * mapChipConfig_.TILE_PIX_SIZE, point.y * mapChipConfig_.TILE_PIX_SIZE, mapChipArea_.x + point.x * mapChipConfig_.TILE_PIX_SIZE + mapChipConfig_.TILE_PIX_SIZE, point.y * mapChipConfig_.TILE_PIX_SIZE + mapChipConfig_.TILE_PIX_SIZE, GetColor(0, 255, 0), false, 5);
 	}
-	DrawBox(mapChipArea_.x + selectedChip.first.x * mapChipConfig_.TILE_PIX_SIZE, selectedChip.first.y * mapChipConfig_.TILE_PIX_SIZE, mapChipArea_.x + selectedChip.first.x * mapChipConfig_.TILE_PIX_SIZE + mapChipConfig_.TILE_PIX_SIZE, selectedChip.first.y * mapChipConfig_.TILE_PIX_SIZE + mapChipConfig_.TILE_PIX_SIZE, GetColor(0, 255, 0), false, 5);
+
+	int px = mapChipArea_.x + (selectedChip.first.x-tipOffset_) * mapChipConfig_.TILE_PIX_SIZE;
+	int py = selectedChip.first.y * mapChipConfig_.TILE_PIX_SIZE;
+	if (mapChipArea_.x < px || mapChipArea_.x + mapChipArea_.w < px + mapChipConfig_.TILE_PIX_SIZE)
+	{
+
+	DrawBox(px,
+		py,
+		px + mapChipConfig_.TILE_PIX_SIZE,
+		py+ mapChipConfig_.TILE_PIX_SIZE, GetColor(0, 255, 0), false, 5);
+	}
 #if 0
 	int topLeft_x = Screen::WIDTH - MAP_CHIP_WIN_WIDTH;
 	int topLeft_y = 0;
@@ -298,39 +308,11 @@ bool MapChip::IsInMapChipArea(Point* point)
 {
 	bool ret = false;
 
-#if 0
-	int topLeft_x = Screen::WIDTH - MAP_CHIP_WIN_WIDTH;
-	int topLeft_y = 0;
-	int bottomRight_x = Screen::WIDTH;
-	int bottomRight_y = MAP_CHIP_WIN_HEIGHT;
-#endif
-#if 0
 	int mx = -1, my = -1;
 	GetMousePoint(&mx, &my);
-	for (int y = 0; y < MAP_CHIP_NUM_Y;y++)
+	for (int y = 0; y < mapChipConfig_.MAPCHIP_VIEW_Y;y++)
 	{
-		for (int x = 0; x < MAP_CHIP_NUM_X;x++)
-		{
-			int handle = bgHandle[y * MAP_CHIP_NUM_X + x];
-			if (handle != -1)
-			{
-				//DrawGraph(topLeft_x + x * mapChipConfig_.TILE_PIX_SIZE, y * mapChipConfig_.TILE_PIX_SIZE, handle, FALSE);
-				if (((mx - topLeft_x) / mapChipConfig_.TILE_PIX_SIZE) == x && (my / mapChipConfig_.TILE_PIX_SIZE) == y)
-				{
-					//DrawBox(topLeft_x + x * mapChipConfig_.TILE_PIX_SIZE, y * mapChipConfig_.TILE_PIX_SIZE, topLeft_x + x * mapChipConfig_.TILE_PIX_SIZE + mapChipConfig_.TILE_PIX_SIZE, y * mapChipConfig_.TILE_PIX_SIZE + mapChipConfig_.TILE_PIX_SIZE, GetColor(0, 255, 0), false, 5);
-					point->x = x;
-					point->y = y;
-					ret = true;
-				}
-			}
-		}
-	}
-#endif
-	int mx = -1, my = -1;
-	GetMousePoint(&mx, &my);
-	for (int y = 0; y < mapChipConfig_.TILES_Y;y++)
-	{
-		for (int x = 0; x < mapChipConfig_.TILES_X;x++)
+		for (int x = 0; x < mapChipConfig_.MAPCHIP_VIEW_X;x++)
 		{
 			int idx = y * mapChipConfig_.TILES_X + (x + tipOffset_);
 			if (idx < bgHandle.size())
@@ -340,8 +322,8 @@ bool MapChip::IsInMapChipArea(Point* point)
 				if (handle != -1)
 				{
 					if (((mx - mapChipArea_.x) / mapChipConfig_.TILE_PIX_SIZE) == x && (my / mapChipConfig_.TILE_PIX_SIZE) == y)
-					//if (((mx - mapChipArea_.x) / mapChipConfig_.TILE_PIX_SIZE) == x + tipOffset_ && (my / mapChipConfig_.TILE_PIX_SIZE) == y)
-					{		
+						//if (((mx - mapChipArea_.x) / mapChipConfig_.TILE_PIX_SIZE) == x + tipOffset_ && (my / mapChipConfig_.TILE_PIX_SIZE) == y)
+					{
 						point->x = x;
 						point->y = y;
 						ret = true;
@@ -354,6 +336,7 @@ bool MapChip::IsInMapChipArea(Point* point)
 			}
 		}
 	}
+
 	return ret;
 }
 
