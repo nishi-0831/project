@@ -54,6 +54,9 @@
     <ClCompile Include="MapChip.cpp" />
     <ClCompile Include="MapEdit.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="MapChipConfig.cpp">
+      <Filter>PlayScene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Screen.h" />
@@ -120,6 +123,9 @@
     <ClInclude Include="MapEdit.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="global.h" />
+    <ClInclude Include="MapChipConfig.h">
+      <Filter>PlayScene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Library">

@@ -10,6 +10,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <WinBase.h>
+
 namespace
 {
 	//std::map<int, int> myMapMap;

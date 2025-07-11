@@ -7,6 +7,8 @@
 #include "Input.h"
 #include "MapEdit.h"
 #include <algorithm>
+#include <WinBase.h>
+#include <string>
 #define test 0
 
 namespace
@@ -73,6 +75,33 @@ void MapChip::Input()
 MapChip::MapChip()
 	: GameObject()
 {
+	char buff[128];
+
+	GetPrivateProfileStringA(
+		"MapChip",
+		"Title",
+		"NONE", //デフォルト値
+		buff,   //取得した値を入れるバッファのアドレス 名前だけでいい
+		sizeof(buff),
+		"./mySetup.ini");
+
+	char buffInt[128];
+	GetPrivateProfileStringA(
+		"MapChip",
+		"WinSize",
+		"255", //デフォルト値
+		buffInt,   //取得した値を入れるバッファのアドレス 名前だけでいい
+		sizeof(buffInt),
+		"./mySetup.ini");
+
+	int tmp = std::stoi(buffInt);
+
+	//int wsize = GetPrivateProfileInt(
+	//	"MapChip",
+	//	"WinSize",
+	//	255, //デフォルト値
+	//	"./mySetup.ini");
+	//LoadIni();
 	selectedChip.second = -1;
 	bgHandle.resize(MAP_CHIP_WIDTH * MAP_CHIP_HEIGHT);
 
@@ -260,6 +289,21 @@ void MapChip::Draw()
 		}
 	}
 #endif
+}
+
+void MapChip::LoadIni()
+{
+	char buff[128];
+
+	GetPrivateProfileStringA(
+		"MapChip",
+		"Title", 
+		"NONE", //デフォルト値
+		buff,   //取得した値を入れるバッファのアドレス 名前だけでいい
+		sizeof(buff), 
+		"./mySetup.ini");
+
+	//printfDx(buff);
 }
 
 bool MapChip::IsInMapChipArea(Point* point)
