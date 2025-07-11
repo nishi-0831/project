@@ -14,10 +14,10 @@
 namespace
 {
 	//同じ名前の変数は後でまとめましょう
-	const int IMAGE_SIZE = { 32 };
+	//const int mapChipConfig_.TILE_PIX_SIZE = { 32 };
 	//画像のチップ数
-	const int MAP_CHIP_WIDTH = { 16 };
-	const int MAP_CHIP_HEIGHT = { 12 };
+	//const int mapChipConfig_.TILES_X = { 16 };
+	//const int mapChipConfig_.TILES_Y = { 12 };
 	//マップのチップ数
 	
 	
@@ -28,13 +28,13 @@ namespace
 #else
 	//チップ選択ウィンドウが表示するチップ数
 	//画像そのもののチップ数と選択ウィンドウが表示するチップ数の変数が見分け付きづらいので要改名
-	const int CHIP_PALETTE_X = { 8 };
-	const int CHIP_PALETTE_Y = { MAP_CHIP_HEIGHT };
+	//const int mapChipConfig_.MAPCHIP_VIEW_X = { 8 };
+	//const int mapChipConfig_.MAPCHIP_VIEW_Y = { mapChipConfig_.TILES_Y };
 #endif
 	
 	//縦
-	const int CHIP_PALETTE_WIN_WIDTH = { IMAGE_SIZE * CHIP_PALETTE_X };
-	const int CHIP_PALETTE_WIN_HEIGHT = { IMAGE_SIZE * CHIP_PALETTE_Y};
+	//const int mapChipConfig_.MAPCHIP_WIN_WIDTH = { mapChipConfig_.TILE_PIX_SIZE * mapChipConfig_.MAPCHIP_VIEW_X };
+	//const int mapChipConfig_.MAPCHIP_WIN_HEIGHT = { mapChipConfig_.TILE_PIX_SIZE * mapChipConfig_.MAPCHIP_VIEW_Y};
 
 #if test
 	std::map<Point, int> bgHandleMap;
@@ -57,7 +57,7 @@ namespace
 }
 void MapChip::Input()
 {
-
+#if 0
 	int dir=0;
 	if (Input::IsKeyDown(KEY_INPUT_D))
 	{
@@ -69,78 +69,59 @@ void MapChip::Input()
 		tipOffset_ -= 1;
 		dir = -1;
 	}
-	tipOffset_ = std::clamp(tipOffset_, 0, CHIP_PALETTE_X);
-	//mapChipArea_.x = std::clamp(mapChipArea_.x+(dir * IMAGE_SIZE), Screen::WIDTH - MAP_CHIP_WIN_WIDTH, Screen::WIDTH);
+	//tipOffset_ = std::clamp(tipOffset_, -mapChipConfig_.MAPCHIP_VIEW_X,0);
+	tipOffset_ = std::clamp(tipOffset_, 0, mapChipConfig_.MAPCHIP_VIEW_X);
+	//mapChipArea_.x = std::clamp(mapChipArea_.x+(dir * mapChipConfig_.TILE_PIX_SIZE), Screen::WIDTH - MAP_CHIP_WIN_WIDTH, Screen::WIDTH);
+#endif
+}
+Point MapChip::GetViewOrigin() const
+{
+	return {Screen::WIDTH - mapChipConfig_.MAPCHIP_WIN_WIDTH,Screen::HEIGHT - mapChipConfig_.MAPCHIP_WIN_HEIGHT};
 }
 MapChip::MapChip()
-	: GameObject()
+	: GameObject() , mapChipConfig_(GetMapChipConfig())
 {
-	char buff[128];
 
-	GetPrivateProfileStringA(
-		"MapChip",
-		"Title",
-		"NONE", //デフォルト値
-		buff,   //取得した値を入れるバッファのアドレス 名前だけでいい
-		sizeof(buff),
-		"./mySetup.ini");
-
-	char buffInt[128];
-	GetPrivateProfileStringA(
-		"MapChip",
-		"WinSize",
-		"255", //デフォルト値
-		buffInt,   //取得した値を入れるバッファのアドレス 名前だけでいい
-		sizeof(buffInt),
-		"./mySetup.ini");
-
-	int tmp = std::stoi(buffInt);
-
-	//int wsize = GetPrivateProfileInt(
-	//	"MapChip",
-	//	"WinSize",
-	//	255, //デフォルト値
-	//	"./mySetup.ini");
-	//LoadIni();
+	
 	selectedChip.second = -1;
-	bgHandle.resize(MAP_CHIP_WIDTH * MAP_CHIP_HEIGHT);
+	bgHandle.resize(mapChipConfig_.TILES_X * mapChipConfig_.TILES_Y);
 
 	tipOffset_ = 0;
 	const char* FileName = "bg.png";
-	int AllNum = MAP_CHIP_WIDTH * MAP_CHIP_HEIGHT;
-	int XNum = MAP_CHIP_WIDTH; 
-	int YNum = MAP_CHIP_HEIGHT;
-	int XSize = IMAGE_SIZE;
-	int YSize = IMAGE_SIZE;
+	int AllNum = mapChipConfig_.TILES_X * mapChipConfig_.TILES_Y;
+	int XNum = mapChipConfig_.TILES_X; 
+	int YNum = mapChipConfig_.TILES_Y;
+	int XSize = mapChipConfig_.TILE_PIX_SIZE;
+	int YSize = mapChipConfig_.TILE_PIX_SIZE;
 	//int HandleBuf*
 
 	int a = LoadGraph("bg.png", 0);
 	LoadDivGraph("bg.png", 
-		MAP_CHIP_WIDTH * MAP_CHIP_HEIGHT, 
-		MAP_CHIP_WIDTH, MAP_CHIP_HEIGHT, 
-		IMAGE_SIZE, IMAGE_SIZE,
+		mapChipConfig_.TILES_X * mapChipConfig_.TILES_Y, 
+		mapChipConfig_.TILES_X, mapChipConfig_.TILES_Y, 
+		mapChipConfig_.TILE_PIX_SIZE, mapChipConfig_.TILE_PIX_SIZE,
 		bgHandle.data());
 
 
-	int topLeft_x = Screen::WIDTH - CHIP_PALETTE_WIN_WIDTH;
+	int topLeft_x = Screen::WIDTH - mapChipConfig_.MAPCHIP_WIN_WIDTH;
 	int topLeft_y = 0;
 	int bottomRight_x = Screen::WIDTH;
-	int bottomRight_y = CHIP_PALETTE_WIN_HEIGHT;
+	int bottomRight_y = mapChipConfig_.MAPCHIP_WIN_HEIGHT;
 
 	
 	defaultMapChipArea_ = {
-	Screen::WIDTH - CHIP_PALETTE_WIN_WIDTH,
+	Screen::WIDTH - mapChipConfig_.MAPCHIP_WIN_WIDTH,
 	0,
-	CHIP_PALETTE_WIN_WIDTH,
-	 CHIP_PALETTE_WIN_HEIGHT
+	mapChipConfig_.MAPCHIP_WIN_WIDTH,
+	 mapChipConfig_.MAPCHIP_WIN_HEIGHT
 	};
 	
 	mapChipArea_ = defaultMapChipArea_;
 
 	for (int i = 0;i < bgHandle.size();i++)
 	{
-		int x = i / MAP_CHIP_WIDTH;
-		int y = i % MAP_CHIP_WIDTH;
+		int x = i / mapChipConfig_.TILES_X;
+		int y = i % mapChipConfig_.TILES_X;
 #if test
 		//https://learn.microsoft.com/ja-jp/cpp/error-messages/compiler-errors-2/compiler-error-c2676?view=msvc-170
 		//Point型にオーバーロードした演算子を書いてない たぶん 二項演算子<
@@ -153,9 +134,9 @@ MapChip::MapChip()
 		
 	}
 	/*LoadDivGraph("bg.png",
-		MAP_CHIP_WIDTH * MAP_CHIP_HEIGHT,
-		MAP_CHIP_WIDTH, MAP_CHIP_HEIGHT,
-		IMAGE_SIZE, IMAGE_SIZE,
+		mapChipConfig_.TILES_X * mapChipConfig_.TILES_Y,
+		mapChipConfig_.TILES_X, mapChipConfig_.TILES_Y,
+		mapChipConfig_.TILE_PIX_SIZE, mapChipConfig_.TILE_PIX_SIZE,
 		bgHandleMap.hImages.data());*/
 
 	//for()
@@ -164,7 +145,7 @@ MapChip::MapChip()
 
 MapChip::~MapChip()
 {
-	for (int i = 0; i < MAP_CHIP_WIDTH * MAP_CHIP_HEIGHT; i++)
+	for (int i = 0; i < mapChipConfig_.TILES_X * mapChipConfig_.TILES_Y; i++)
 	{
 		if (bgHandle[i] != -1)
 		{
@@ -184,8 +165,8 @@ void MapChip::Update()
 		return;
 	}
 
-	isInMapChipArea_ = (mousePos.x > Screen::WIDTH - MAP_CHIP_WIDTH && mousePos.x < Screen::WIDTH &&
-		mousePos.y > 0 && mousePos.y < CHIP_PALETTE_WIN_HEIGHT);
+	isInMapChipArea_ = (mousePos.x > GetViewOrigin().x && mousePos.x < Screen::WIDTH &&
+		mousePos.y > GetViewOrigin().y && mousePos.y < mapChipConfig_.MAPCHIP_WIN_HEIGHT);
 	if (isInMapChipArea_)
 	{
 
@@ -201,7 +182,7 @@ void MapChip::Update()
 		{
 			//int index = point.y * MAP_CHIP_NUM_X + point.x;
 			selectedChip.first = Point{ point.x + tipOffset_,point.y };
-			selectedChip.second = bgHandleMap[point.y * MAP_CHIP_WIDTH +( point.x + tipOffset_)];
+			selectedChip.second = bgHandleMap[point.y * mapChipConfig_.TILES_X +( point.x + tipOffset_)];
 
 		}
 		
@@ -230,26 +211,33 @@ void MapChip::Draw()
 		for (int x = 0; x < MAP_CHIP_NUM_X;x++)
 		{
 			//tipOffset_を加えた
-			int handle = bgHandle[y * MAP_CHIP_WIDTH + (x)];
+			int handle = bgHandle[y * mapChipConfig_.TILES_X + (x)];
 
 			//bgHandleの範囲外にアクセスしてしまう
 			//int handle = bgHandle[y * MAP_CHIP_NUM_X + (x + tipOffset_)];
 			if (handle != -1)
 			{
-				DrawGraph(mapChipArea_.x + (x+tipOffset_) * IMAGE_SIZE, y * IMAGE_SIZE, handle, FALSE);
+				DrawGraph(mapChipArea_.x + (x+tipOffset_) * mapChipConfig_.TILE_PIX_SIZE, y * mapChipConfig_.TILE_PIX_SIZE, handle, FALSE);
 			}
 		}
 	}
 #else
-	for (int y = 0; y < CHIP_PALETTE_Y;y++)
+	for (int y = 0; y < mapChipConfig_.MAPCHIP_VIEW_Y;y++)
 	{
-		for (int x = 0; x < CHIP_PALETTE_X;x++)
+		for (int x = 0; x < mapChipConfig_.MAPCHIP_VIEW_X;x++)
 		{
-			int handle = bgHandle[y * MAP_CHIP_WIDTH + (x + tipOffset_)];
-
-			if (handle != -1)
+			int idx = y * mapChipConfig_.TILES_X + (x + tipOffset_);
+			if (idx < bgHandle.size())
 			{
-				DrawGraph(mapChipArea_.x + x * IMAGE_SIZE,mapChipArea_.y + y * IMAGE_SIZE, handle, FALSE);
+				int handle = bgHandle[idx];
+				if (handle != -1)
+				{
+					DrawGraph(mapChipArea_.x + x * mapChipConfig_.TILE_PIX_SIZE,mapChipArea_.y + y * mapChipConfig_.TILE_PIX_SIZE, handle, FALSE);
+				}
+			}
+			else
+			{
+				int a = 0;
 			}
 		}
 	}
@@ -262,9 +250,9 @@ void MapChip::Draw()
 	DrawGraph(mousePos.x , mousePos.y, selectedChip.second,TRUE);
 	if (IsInMapChipArea(&point))
 	{
-		DrawBox(mapChipArea_.x + point.x * IMAGE_SIZE, point.y * IMAGE_SIZE, mapChipArea_.x + point.x * IMAGE_SIZE + IMAGE_SIZE, point.y * IMAGE_SIZE + IMAGE_SIZE, GetColor(0, 255, 0), false, 5);
+		DrawBox(mapChipArea_.x + point.x * mapChipConfig_.TILE_PIX_SIZE, point.y * mapChipConfig_.TILE_PIX_SIZE, mapChipArea_.x + point.x * mapChipConfig_.TILE_PIX_SIZE + mapChipConfig_.TILE_PIX_SIZE, point.y * mapChipConfig_.TILE_PIX_SIZE + mapChipConfig_.TILE_PIX_SIZE, GetColor(0, 255, 0), false, 5);
 	}
-	DrawBox(mapChipArea_.x + selectedChip.first.x * IMAGE_SIZE, selectedChip.first.y * IMAGE_SIZE, mapChipArea_.x + selectedChip.first.x * IMAGE_SIZE + IMAGE_SIZE, selectedChip.first.y * IMAGE_SIZE + IMAGE_SIZE, GetColor(0, 255, 0), false, 5);
+	DrawBox(mapChipArea_.x + selectedChip.first.x * mapChipConfig_.TILE_PIX_SIZE, selectedChip.first.y * mapChipConfig_.TILE_PIX_SIZE, mapChipArea_.x + selectedChip.first.x * mapChipConfig_.TILE_PIX_SIZE + mapChipConfig_.TILE_PIX_SIZE, selectedChip.first.y * mapChipConfig_.TILE_PIX_SIZE + mapChipConfig_.TILE_PIX_SIZE, GetColor(0, 255, 0), false, 5);
 #if 0
 	int topLeft_x = Screen::WIDTH - MAP_CHIP_WIN_WIDTH;
 	int topLeft_y = 0;
@@ -280,10 +268,10 @@ void MapChip::Draw()
 			int handle = bgHandle[y * MAP_CHIP_NUM_X + x];
 			if (handle != -1)
 			{
-				DrawGraph(topLeft_x + x * IMAGE_SIZE, y * IMAGE_SIZE, handle, FALSE);
-				if (((mx - topLeft_x ) / IMAGE_SIZE  ) == x && (my / IMAGE_SIZE) == y)
+				DrawGraph(topLeft_x + x * mapChipConfig_.TILE_PIX_SIZE, y * mapChipConfig_.TILE_PIX_SIZE, handle, FALSE);
+				if (((mx - topLeft_x ) / mapChipConfig_.TILE_PIX_SIZE  ) == x && (my / mapChipConfig_.TILE_PIX_SIZE) == y)
 				{
-					DrawBox(topLeft_x + x * IMAGE_SIZE, y * IMAGE_SIZE, topLeft_x + x * IMAGE_SIZE + IMAGE_SIZE, y * IMAGE_SIZE + IMAGE_SIZE, GetColor(0, 255, 0), false, 5);
+					DrawBox(topLeft_x + x * mapChipConfig_.TILE_PIX_SIZE, y * mapChipConfig_.TILE_PIX_SIZE, topLeft_x + x * mapChipConfig_.TILE_PIX_SIZE + mapChipConfig_.TILE_PIX_SIZE, y * mapChipConfig_.TILE_PIX_SIZE + mapChipConfig_.TILE_PIX_SIZE, GetColor(0, 255, 0), false, 5);
 				}
 			}
 		}
@@ -326,10 +314,10 @@ bool MapChip::IsInMapChipArea(Point* point)
 			int handle = bgHandle[y * MAP_CHIP_NUM_X + x];
 			if (handle != -1)
 			{
-				//DrawGraph(topLeft_x + x * IMAGE_SIZE, y * IMAGE_SIZE, handle, FALSE);
-				if (((mx - topLeft_x) / IMAGE_SIZE) == x && (my / IMAGE_SIZE) == y)
+				//DrawGraph(topLeft_x + x * mapChipConfig_.TILE_PIX_SIZE, y * mapChipConfig_.TILE_PIX_SIZE, handle, FALSE);
+				if (((mx - topLeft_x) / mapChipConfig_.TILE_PIX_SIZE) == x && (my / mapChipConfig_.TILE_PIX_SIZE) == y)
 				{
-					//DrawBox(topLeft_x + x * IMAGE_SIZE, y * IMAGE_SIZE, topLeft_x + x * IMAGE_SIZE + IMAGE_SIZE, y * IMAGE_SIZE + IMAGE_SIZE, GetColor(0, 255, 0), false, 5);
+					//DrawBox(topLeft_x + x * mapChipConfig_.TILE_PIX_SIZE, y * mapChipConfig_.TILE_PIX_SIZE, topLeft_x + x * mapChipConfig_.TILE_PIX_SIZE + mapChipConfig_.TILE_PIX_SIZE, y * mapChipConfig_.TILE_PIX_SIZE + mapChipConfig_.TILE_PIX_SIZE, GetColor(0, 255, 0), false, 5);
 					point->x = x;
 					point->y = y;
 					ret = true;
@@ -340,20 +328,29 @@ bool MapChip::IsInMapChipArea(Point* point)
 #endif
 	int mx = -1, my = -1;
 	GetMousePoint(&mx, &my);
-	for (int y = 0; y < MAP_CHIP_HEIGHT;y++)
+	for (int y = 0; y < mapChipConfig_.TILES_Y;y++)
 	{
-		for (int x = 0; x < MAP_CHIP_WIDTH;x++)
+		for (int x = 0; x < mapChipConfig_.TILES_X;x++)
 		{
-			int handle = bgHandle[y * MAP_CHIP_WIDTH + (x + tipOffset_)];
-			if (handle != -1)
+			int idx = y * mapChipConfig_.TILES_X + (x + tipOffset_);
+			if (idx < bgHandle.size())
 			{
-				if (((mx - mapChipArea_.x) / IMAGE_SIZE) == x && (my / IMAGE_SIZE) == y)
-				//if (((mx - mapChipArea_.x) / IMAGE_SIZE) == x + tipOffset_ && (my / IMAGE_SIZE) == y)
-				{		
-					point->x = x;
-					point->y = y;
-					ret = true;
+
+				int handle = bgHandle[y * mapChipConfig_.TILES_X + (x + tipOffset_)];
+				if (handle != -1)
+				{
+					if (((mx - mapChipArea_.x) / mapChipConfig_.TILE_PIX_SIZE) == x && (my / mapChipConfig_.TILE_PIX_SIZE) == y)
+					//if (((mx - mapChipArea_.x) / mapChipConfig_.TILE_PIX_SIZE) == x + tipOffset_ && (my / mapChipConfig_.TILE_PIX_SIZE) == y)
+					{		
+						point->x = x;
+						point->y = y;
+						ret = true;
+					}
 				}
+			}
+			else
+			{
+				int a = 0;
 			}
 		}
 	}

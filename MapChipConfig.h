@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 struct MapChipConfig
 {
 	int TILE_PIX_SIZE;//1タイルのピクセルサイズ
@@ -14,3 +15,4 @@ struct MapChipConfig
 //constで渡して間違って書き換えさせない
 //参照だからコピーのオーバーヘッドはない
 const MapChipConfig& GetMapChipConfig();
+MapChipConfig LoadMapChipConfig(const std::string& iniPath);

@@ -19,6 +19,7 @@ private:
 	Rect mapChipArea_;
 	int selectedIndex_;
 	MapChipConfig mapChipConfig_;
+	Point GetViewOrigin() const;
 public:
 	std::vector<int> bgHandle;
 	MapChip();
