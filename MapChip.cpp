@@ -262,6 +262,8 @@ void MapChip::Draw()
 #endif
 }
 
+
+
 bool MapChip::IsInMapChipArea(Point* point)
 {
 	bool ret = false;

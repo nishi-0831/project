@@ -23,6 +23,7 @@ public:
 	~MapChip();
 	void Update() override;
 	void Draw() override;
+	
 	bool IsInMapChipArea(Point* point);
 	//void File()
 	int GetHImage();

@@ -13,8 +13,10 @@
 namespace
 {
 	//std::map<int, int> myMapMap;
-	Point down;
-	Point up;
+	Point down = Point{0,0};
+	Point up = Point{ 0,0 };
+	bool rectSelecting = false;
+	Rect rect;
 }
 #define flag 1
 MapEdit::MapEdit()
@@ -49,13 +51,47 @@ void MapEdit::Update()
 	{
 		LoadMapData();
 	}
-	//if(Input::IsButtonUp(Mou))
+	if (Input::IsButtonDown(Input::Mouse::MIDDLE))
+	{
+		int x, y;
+		GetMousePoint(&x, &y);
+		down.x = x;
+		down.y = y;
+		rectSelecting = true;
+	}
+	if (Input::IsButtonKeep(Input::Mouse::MIDDLE) && rectSelecting)
+	{
+		int x, y;
+		GetMousePoint(&x, &y);
+		up.x = x;
+		up.y = y;
+	}
+	if (Input::IsButtonUp(Input::Mouse::MIDDLE) && rectSelecting)
+	{
+		rectSelecting = false;
+		//downとupでrectFill()!!!
+		//MapChip* mapChip = FindGameObject<MapChip>();
+		//RectFill(mapChip->GetHImage());
+	}
 }
 
 void MapEdit::Draw()
 {
+	ImGui::Begin("Rect");
+	SetSelectRect();
+	ImGui::Text("down(%i,%i)", down.x, down.y);
+	ImGui::Text("up(%i,%i)", up.x, up.y);
+	ImGui::Text("rect(%i,%i,%i,%i)", rect.x, rect.y, rect.w, rect.h);
 
+	ImGui::End();
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
+	if (rectSelecting)
+	{
+		DrawSelectRect();
+
+	}
+
+
 
 	int topLeftX = 0 + LEFT_MARGIN;
 	int topLeftY = 0 + TOP_MARGIN;
@@ -107,6 +143,46 @@ void MapEdit::Draw()
 
 	ImGui::End();
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+}
+
+void MapEdit::DrawSelectRect()
+{
+	
+	DrawBox(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h, GetColor(0, 200, 0), FALSE);
+}
+
+void MapEdit::SetSelectRect()
+{
+	//押し込んだ時の座標と、離した時の座標で矩形を作る
+
+	//小さい値を左/上とする
+
+
+	//押し込んだ時のxが左
+	if (down.x < up.x)
+	{
+		rect.x = down.x;
+		rect.w = up.x - down.x;
+	}
+	//離した時
+	else
+	{
+		rect.x = up.x;
+		rect.w = down.x - up.x;
+	}
+
+	///y
+	if (down.y < up.y)
+	{
+		rect.y = down.y;
+		rect.h = up.y - down.y;
+	}
+	//離した時
+	else
+	{
+		rect.y = down.y;
+		rect.h = down.y - up.y;
+	}
 }
 
 void MapEdit::SetMap(int value)
@@ -176,40 +252,7 @@ void MapEdit::FillRecursive(int fillHImage, int checkHImage, Point p)
 
 void MapEdit::RectFill(int value)
 {
-	//押し込んだ時の座標と、離した時の座標で矩形を作る
-	Point downPos = Point{0,0};
-	Point upPos = Point{1000,1000};
-
-	//小さい値を左/上とする
-	Rect rect;
-
-	///x
-
-	//押し込んだ時のxが左
-	if (downPos.x < upPos.x)
-	{
-		rect.x = downPos.x;
-		rect.w = upPos.x - downPos.x;
-	}
-	//離した時
-	else
-	{
-		rect.x = upPos.x - downPos.x;
-		rect.w = downPos.x;
-	}
-
-	///y
-	if (downPos.y < upPos.y)
-	{
-		rect.y = downPos.y;
-		rect.h = upPos.y - downPos.y;
-	}
-	//離した時
-	else
-	{
-		rect.y = upPos.y - downPos.y;
-		rect.h = downPos.y;
-	}
+	SetSelectRect();
 }
 
 Point MapEdit::ToSafeNeighbor(Point start, Point movement)
