@@ -17,6 +17,7 @@ namespace
 	Point up = Point{ 0,0 };
 	bool rectSelecting = false;
 	Rect rect;
+	Rect gridRect;
 }
 #define flag 1
 MapEdit::MapEdit()
@@ -70,8 +71,9 @@ void MapEdit::Update()
 	{
 		rectSelecting = false;
 		//downÇ∆upÇ≈rectFill()!!!
-		//MapChip* mapChip = FindGameObject<MapChip>();
-		//RectFill(mapChip->GetHImage());
+		MapChip* mapChip = FindGameObject<MapChip>();
+		RectFill(mapChip->GetHImage());
+		//RectFill(1);
 	}
 }
 
@@ -82,6 +84,7 @@ void MapEdit::Draw()
 	ImGui::Text("down(%i,%i)", down.x, down.y);
 	ImGui::Text("up(%i,%i)", up.x, up.y);
 	ImGui::Text("rect(%i,%i,%i,%i)", rect.x, rect.y, rect.w, rect.h);
+	ImGui::Text("gridRect(%i,%i,%i,%i)", gridRect.x, gridRect.y, gridRect.w, gridRect.h);
 
 	ImGui::End();
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
@@ -180,9 +183,50 @@ void MapEdit::SetSelectRect()
 	//ó£ÇµÇΩéû
 	else
 	{
-		rect.y = down.y;
+		rect.y = up.y;
 		rect.h = down.y - up.y;
 	}
+}
+void MapEdit::RectFill(int value)
+{
+	SetSelectRect();
+	gridRect =
+	{
+		std::clamp((rect.x - LEFT_MARGIN) / MAP_IMAGE_SIZE,0,MAP_WIDTH-1),
+		std::clamp((rect.y - TOP_MARGIN) / MAP_IMAGE_SIZE,0,MAP_HEIGHT-1),
+		std::clamp((rect.x + rect.w - LEFT_MARGIN) / MAP_IMAGE_SIZE,0,MAP_WIDTH-1),
+		std::clamp((rect.y + rect.h - TOP_MARGIN) / MAP_IMAGE_SIZE,0,MAP_HEIGHT-1)
+	};
+	
+
+	//xÇ™-ÇæÇ∆ÇªÇ‡ÇªÇ‡ï]âøÇ≥ÇÍÇ»Ç≠Ç»ÇÈ
+	/*int i = gridRect.x;
+	while ((i <= gridRect.w && i < MAP_WIDTH ) && i >= 0)
+	{
+		int j = gridRect.y;
+		while ((j <= gridRect.h && j < MAP_HEIGHT ) && j >= 0)
+		{
+			int idx = i + (j * MAP_WIDTH);
+			myMap_[idx] = value;
+			j++;
+		}
+		i++;
+	}*/
+
+	//óÃàÊÇîÕàÕäOÇ…ëóÇÈÇ∆ç∑ï™Ç™Ç≈Çƒç∂ÇÃÇŸÇ§Ç…
+	// xÇ™MAP_WIDTHí¥Ç¶ÇÈÇ∆ÇªÇÃï™â∫ÇÃçsÇ…
+	for (int i = gridRect.x;i <= gridRect.w;i++)
+	{
+		for (int j = gridRect.y; j <= gridRect.h; j++)
+		{
+			int idx = i + (j * MAP_WIDTH);
+			if (idx >= 0 && idx < MAP_WIDTH * MAP_HEIGHT)
+			{
+				myMap_[idx] = value;
+			}
+		}
+	}
+	
 }
 
 void MapEdit::SetMap(int value)
@@ -250,10 +294,6 @@ void MapEdit::FillRecursive(int fillHImage, int checkHImage, Point p)
 }
 
 
-void MapEdit::RectFill(int value)
-{
-	SetSelectRect();
-}
 
 Point MapEdit::ToSafeNeighbor(Point start, Point movement)
 {

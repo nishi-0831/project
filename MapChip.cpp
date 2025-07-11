@@ -298,9 +298,9 @@ bool MapChip::IsInMapChipArea(Point* point)
 #endif
 	int mx = -1, my = -1;
 	GetMousePoint(&mx, &my);
-	for (int y = 0; y < MAP_CHIP_HEIGHT;y++)
+	for (int y = 0; y < CHIP_PALETTE_Y;y++)
 	{
-		for (int x = 0; x < MAP_CHIP_WIDTH;x++)
+		for (int x = 0; x < CHIP_PALETTE_X;x++)
 		{
 			int handle = bgHandle[y * MAP_CHIP_WIDTH + (x + tipOffset_)];
 			if (handle != -1)
