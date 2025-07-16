@@ -187,6 +187,9 @@
     <ClCompile Include="Source\TitleScene.cpp" />
     <ClCompile Include="Stage.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="mySetup.ini" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

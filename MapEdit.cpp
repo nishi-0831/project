@@ -46,7 +46,7 @@ MapEdit::~MapEdit()
 
 void MapEdit::Update()
 {
-	if (Input::IsKeyDown(KEY_INPUT_S))
+	if (Input::IsKeyDown(KEY_INPUT_S) && Input::IsKeepKeyDown(KEY_INPUT_LSHIFT))
 	{
 		SaveMapData();
 	}

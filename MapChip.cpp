@@ -61,16 +61,25 @@ void MapChip::Input()
 	int dir=0;
 	if (Input::IsKeyDown(KEY_INPUT_D))
 	{
-		tipOffset_ += 1;
+		tipOffsetX_ += 1;
 		dir = 1;
 	}
 	if (Input::IsKeyDown(KEY_INPUT_A))
 	{
-		tipOffset_ -= 1;
+		tipOffsetX_ -= 1;
 		dir = -1;
 	}
+	if (Input::IsKeyDown(KEY_INPUT_W))
+	{
+		tipOffsetY_ -= 1;
+	}
+	if (Input::IsKeyDown(KEY_INPUT_S))
+	{
+		tipOffsetY_ += 1;
+	}
 	//tipOffset_ = std::clamp(tipOffset_, -mapChipConfig_.MAPCHIP_VIEW_X,0);
-	tipOffset_ = std::clamp(tipOffset_, 0, mapChipConfig_.MAPCHIP_VIEW_X);
+	tipOffsetX_ = std::clamp(tipOffsetX_, 0, mapChipConfig_.TILES_X -mapChipConfig_.MAPCHIP_VIEW_X);
+	tipOffsetY_ = std::clamp(tipOffsetY_, 0, mapChipConfig_.TILES_Y - mapChipConfig_.MAPCHIP_VIEW_Y);
 	//mapChipArea_.x = std::clamp(mapChipArea_.x+(dir * mapChipConfig_.TILE_PIX_SIZE), Screen::WIDTH - MAP_CHIP_WIN_WIDTH, Screen::WIDTH);
 #endif
 }
@@ -86,7 +95,8 @@ MapChip::MapChip()
 	selectedChip.second = -1;
 	bgHandle.resize(mapChipConfig_.TILES_X * mapChipConfig_.TILES_Y);
 
-	tipOffset_ = 0;
+	tipOffsetX_ = 0;
+	tipOffsetY_ = 0;
 	const char* FileName = "bg.png";
 	int AllNum = mapChipConfig_.TILES_X * mapChipConfig_.TILES_Y;
 	int XNum = mapChipConfig_.TILES_X; 
@@ -181,8 +191,10 @@ void MapChip::Update()
 		if (IsInMapChipArea(&point))
 		{
 			//int index = point.y * MAP_CHIP_NUM_X + point.x;
-			selectedChip.first = Point{ point.x + tipOffset_,point.y };
-			selectedChip.second = bgHandleMap[point.y * mapChipConfig_.TILES_X +( point.x + tipOffset_)];
+			//selectedChip.first = Point{ point.x + tipOffsetX_,point.y };
+			selectedChip.first = Point{ point.x + tipOffsetX_,point.y + tipOffsetY_ };
+			//selectedChip.second = bgHandleMap[(point.y + tipOffsetY_ ) * mapChipConfig_.TILES_X +( point.x + tipOffsetX_)];
+			selectedChip.second = bgHandleMap[(point.y +tipOffsetY_ ) * mapChipConfig_.TILES_X +( point.x + tipOffsetX_)];
 
 		}
 		
@@ -226,7 +238,8 @@ void MapChip::Draw()
 	{
 		for (int x = 0; x < mapChipConfig_.MAPCHIP_VIEW_X;x++)
 		{
-			int idx = y * mapChipConfig_.TILES_X + (x + tipOffset_);
+			int idx = (y + tipOffsetY_) * mapChipConfig_.TILES_X + (x + tipOffsetX_);
+			//int idx = y * mapChipConfig_.TILES_X + (x + tipOffsetX_);
 			if (idx < bgHandle.size())
 			{
 				int handle = bgHandle[idx];
@@ -253,8 +266,9 @@ void MapChip::Draw()
 		DrawBox(mapChipArea_.x + point.x * mapChipConfig_.TILE_PIX_SIZE, point.y * mapChipConfig_.TILE_PIX_SIZE, mapChipArea_.x + point.x * mapChipConfig_.TILE_PIX_SIZE + mapChipConfig_.TILE_PIX_SIZE, point.y * mapChipConfig_.TILE_PIX_SIZE + mapChipConfig_.TILE_PIX_SIZE, GetColor(0, 255, 0), false, 5);
 	}
 
-	int px = mapChipArea_.x + (selectedChip.first.x-tipOffset_) * mapChipConfig_.TILE_PIX_SIZE;
-	int py = selectedChip.first.y * mapChipConfig_.TILE_PIX_SIZE;
+	int px = mapChipArea_.x + (selectedChip.first.x-tipOffsetX_) * mapChipConfig_.TILE_PIX_SIZE;
+	int py = (selectedChip.first.y - tipOffsetY_) * mapChipConfig_.TILE_PIX_SIZE;
+	//int py = selectedChip.first.y * mapChipConfig_.TILE_PIX_SIZE;
 	if (mapChipArea_.x < px || mapChipArea_.x + mapChipArea_.w < px + mapChipConfig_.TILE_PIX_SIZE)
 	{
 
@@ -314,11 +328,13 @@ bool MapChip::IsInMapChipArea(Point* point)
 	{
 		for (int x = 0; x < mapChipConfig_.MAPCHIP_VIEW_X;x++)
 		{
-			int idx = y * mapChipConfig_.TILES_X + (x + tipOffset_);
+			//int idx = (y) * mapChipConfig_.TILES_X + (x + tipOffsetX_);
+			int idx = (y + tipOffsetY_) * mapChipConfig_.TILES_X + (x + tipOffsetX_);
 			if (idx < bgHandle.size())
 			{
 
-				int handle = bgHandle[y * mapChipConfig_.TILES_X + (x + tipOffset_)];
+				int handle = bgHandle[(y + tipOffsetY_) * mapChipConfig_.TILES_X + (x + tipOffsetX_)];
+				//int handle = bgHandle[y * mapChipConfig_.TILES_X + (x + tipOffsetX_)];
 				if (handle != -1)
 				{
 					if (((mx - mapChipArea_.x) / mapChipConfig_.TILE_PIX_SIZE) == x && (my / mapChipConfig_.TILE_PIX_SIZE) == y)

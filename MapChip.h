@@ -10,7 +10,8 @@ class MapChip :
 {
 private:
 	//チップを横スクロールさせたい
-	int tipOffset_;
+	int tipOffsetX_;
+	int tipOffsetY_;
 	void Input();
 
 	bool isUpdate_;
