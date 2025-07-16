@@ -23,7 +23,7 @@ namespace
 }
 #define flag 1
 MapEdit::MapEdit()
-	: GameObject(), myMap_(MAP_WIDTH* MAP_HEIGHT, -1)//初期値を-1で20*20のマップ
+	: GameObject(), mapEditConfig_(GetMapEditConfig())
 {
 	//mapChipArea_ = {
 	/*Screen::WIDTH - MAP_CHIP_WIN_WIDTH,
@@ -31,11 +31,19 @@ MapEdit::MapEdit()
 		Screen::WIDTH,
 		MAP_CHIP_WIN_HEIGHT*/
 		//};
+
+	//mapEditConfig_.MAP_WIDTH = mapEditConfig_.MAP_WIDTH;
+		//mapEditConfig_.MAP_HEIGHT = mapEditConfig_.MAP_HEIGHT;
+		//mapEditConfig_.MAP_IMAGE_SIZE = mapEditConfig_.MAP_IMAGE_SIZE;
+		//mapEditConfig_.LEFT_MARGIN = mapEditConfig_.LEFT_MARGIN;
+		//mapEditConfig_.TOP_MARGIN = mapEditConfig_.TOP_MARGIN;
+
+	myMap_.resize(mapEditConfig_.MAP_WIDTH * mapEditConfig_.MAP_HEIGHT, -1);//初期値を-1で20*20のマップ
 	mapEditArea_ = {
-		LEFT_MARGIN,
-		TOP_MARGIN,
-		MAP_IMAGE_SIZE * MAP_WIDTH + LEFT_MARGIN,
-		MAP_IMAGE_SIZE * MAP_HEIGHT + TOP_MARGIN
+		mapEditConfig_.LEFT_MARGIN,
+		mapEditConfig_.TOP_MARGIN,
+		mapEditConfig_.MAP_IMAGE_SIZE * mapEditConfig_.MAP_WIDTH + mapEditConfig_.LEFT_MARGIN,
+		mapEditConfig_.MAP_IMAGE_SIZE * mapEditConfig_.MAP_HEIGHT + mapEditConfig_.TOP_MARGIN
 	};
 }
 
@@ -98,15 +106,15 @@ void MapEdit::Draw()
 
 
 
-	int topLeftX = 0 + LEFT_MARGIN;
-	int topLeftY = 0 + TOP_MARGIN;
-	int bottomLightX = MAP_IMAGE_SIZE * MAP_WIDTH + LEFT_MARGIN;
-	int bottomLightY = MAP_IMAGE_SIZE * MAP_HEIGHT + TOP_MARGIN;
+	int topLeftX = 0 + mapEditConfig_.LEFT_MARGIN;
+	int topLeftY = 0 + mapEditConfig_.TOP_MARGIN;
+	int bottomLightX = mapEditConfig_.MAP_IMAGE_SIZE * mapEditConfig_.MAP_WIDTH + mapEditConfig_.LEFT_MARGIN;
+	int bottomLightY = mapEditConfig_.MAP_IMAGE_SIZE * mapEditConfig_.MAP_HEIGHT + mapEditConfig_.TOP_MARGIN;
 	DrawBox(topLeftX, topLeftY, bottomLightX - 1, bottomLightY - 1, GetColor(122, 122, 122), FALSE, 3);
 
-	for (int i = 1;i < MAP_WIDTH;i++)
+	for (int i = 1;i < mapEditConfig_.MAP_WIDTH;i++)
 	{
-		int x = i * MAP_IMAGE_SIZE + LEFT_MARGIN;
+		int x = i * mapEditConfig_.MAP_IMAGE_SIZE + mapEditConfig_.LEFT_MARGIN;
 
 		//起点のy
 		int startY = topLeftY;
@@ -115,10 +123,10 @@ void MapEdit::Draw()
 
 		DrawLine(x, startY, x, endY, GetColor(255, 0, 0), 1);
 	}
-	for (int i = 1;i < MAP_HEIGHT;i++)
+	for (int i = 1;i < mapEditConfig_.MAP_HEIGHT;i++)
 	{
 		//起点も終点もyは同じ。横線だから
-		int y = i * MAP_IMAGE_SIZE + TOP_MARGIN;
+		int y = i * mapEditConfig_.MAP_IMAGE_SIZE + mapEditConfig_.TOP_MARGIN;
 
 		//起点のx
 		int startX = topLeftX;
@@ -132,12 +140,12 @@ void MapEdit::Draw()
 		//DrawBox(mapEditArea_.x, mapEditArea_.y, mapEditArea_.w, mapEditArea_.h, GetColor(255, 0, 0), TRUE);
 	}
 	ImGui::Begin("MapEdit");
-	for (int y = 0; y < MAP_HEIGHT;y++)
+	for (int y = 0; y < mapEditConfig_.MAP_HEIGHT;y++)
 	{
 		const int IMAGE_SIZE = { 32 };
-		for (int x = 0; x < MAP_WIDTH;x++)
+		for (int x = 0; x < mapEditConfig_.MAP_WIDTH;x++)
 		{
-			int handle = myMap_[y * MAP_WIDTH + x];
+			int handle = myMap_[y * mapEditConfig_.MAP_WIDTH + x];
 			ImGui::Text("myMap(%d,%d):%d", x, y, handle);
 			if (handle != -1)
 			{
@@ -194,21 +202,21 @@ void MapEdit::RectFill(int value)
 	SetSelectRect();
 	gridRect =
 	{
-		std::clamp((rect.x - LEFT_MARGIN) / MAP_IMAGE_SIZE,0,MAP_WIDTH-1),
-		std::clamp((rect.y - TOP_MARGIN) / MAP_IMAGE_SIZE,0,MAP_HEIGHT-1),
-		std::clamp((rect.x + rect.w - LEFT_MARGIN) / MAP_IMAGE_SIZE,0,MAP_WIDTH-1),
-		std::clamp((rect.y + rect.h - TOP_MARGIN) / MAP_IMAGE_SIZE,0,MAP_HEIGHT-1)
+		std::clamp((rect.x - mapEditConfig_.LEFT_MARGIN) / mapEditConfig_.MAP_IMAGE_SIZE,0,mapEditConfig_.MAP_WIDTH-1),
+		std::clamp((rect.y - mapEditConfig_.TOP_MARGIN) / mapEditConfig_.MAP_IMAGE_SIZE,0,mapEditConfig_.MAP_HEIGHT-1),
+		std::clamp((rect.x + rect.w - mapEditConfig_.LEFT_MARGIN) / mapEditConfig_.MAP_IMAGE_SIZE,0,mapEditConfig_.MAP_WIDTH-1),
+		std::clamp((rect.y + rect.h - mapEditConfig_.TOP_MARGIN) / mapEditConfig_.MAP_IMAGE_SIZE,0,mapEditConfig_.MAP_HEIGHT-1)
 	};
 	
 
 	//xが-だとそもそも評価されなくなる
 	/*int i = gridRect.x;
-	while ((i <= gridRect.w && i < MAP_WIDTH ) && i >= 0)
+	while ((i <= gridRect.w && i < mapEditConfig_.MAP_WIDTH ) && i >= 0)
 	{
 		int j = gridRect.y;
-		while ((j <= gridRect.h && j < MAP_HEIGHT ) && j >= 0)
+		while ((j <= gridRect.h && j < mapEditConfig_.MAP_HEIGHT ) && j >= 0)
 		{
-			int idx = i + (j * MAP_WIDTH);
+			int idx = i + (j * mapEditConfig_.MAP_WIDTH);
 			myMap_[idx] = value;
 			j++;
 		}
@@ -216,13 +224,13 @@ void MapEdit::RectFill(int value)
 	}*/
 
 	//領域を範囲外に送ると差分がでて左のほうに
-	// xがMAP_WIDTH超えるとその分下の行に
+	// xがmapEditConfig_.MAP_WIDTH超えるとその分下の行に
 	for (int i = gridRect.x;i <= gridRect.w;i++)
 	{
 		for (int j = gridRect.y; j <= gridRect.h; j++)
 		{
-			int idx = i + (j * MAP_WIDTH);
-			if (idx >= 0 && idx < MAP_WIDTH * MAP_HEIGHT)
+			int idx = i + (j * mapEditConfig_.MAP_WIDTH);
+			if (idx >= 0 && idx < mapEditConfig_.MAP_WIDTH * mapEditConfig_.MAP_HEIGHT)
 			{
 				myMap_[idx] = value;
 			}
@@ -236,7 +244,7 @@ void MapEdit::SetMap(int value)
 	Point p = { 0,1 };
 	if (IsInMapEdit(&p))
 	{
-		int idx = p.x + MAP_WIDTH * p.y;
+		int idx = p.x + mapEditConfig_.MAP_WIDTH * p.y;
 		myMap_[idx] = value;
 	}
 }
@@ -255,7 +263,7 @@ void MapEdit::Fill(int value)
 	int checkHImage;
 	if (IsInMapEdit(&p))
 	{
-		idx = p.x + MAP_WIDTH * p.y;
+		idx = p.x + mapEditConfig_.MAP_WIDTH * p.y;
 		//押した箇所のHIage
 		checkHImage = myMap_[idx];
 	}
@@ -271,7 +279,7 @@ void MapEdit::FillRecursive(int fillHImage, int checkHImage, Point p)
 {
 #if flag
 	int idx;
-	idx = p.x + (MAP_WIDTH * p.y);
+	idx = p.x + (mapEditConfig_.MAP_WIDTH * p.y);
 	//クリックした箇所のhImageと、選択中のhImageが一緒ならreturn
 	if (myMap_[idx] == fillHImage)
 	{
@@ -299,8 +307,8 @@ void MapEdit::FillRecursive(int fillHImage, int checkHImage, Point p)
 
 Point MapEdit::ToSafeNeighbor(Point start, Point movement)
 {
-	start.x = std::clamp(start.x += movement.x, 0, MAP_WIDTH - 1);
-	start.y = std::clamp(start.y += movement.y, 0, MAP_HEIGHT - 1);
+	start.x = std::clamp(start.x += movement.x, 0, mapEditConfig_.MAP_WIDTH - 1);
+	start.y = std::clamp(start.y += movement.y, 0, mapEditConfig_.MAP_HEIGHT - 1);
 
 	return start;
 }
@@ -313,13 +321,13 @@ bool MapEdit::IsInMapEdit(Point* p)
 
 	int mx = -1, my = -1;
 	GetMousePoint(&mx, &my);
-	for (int y = 0; y < MAP_HEIGHT;y++)
+	for (int y = 0; y < mapEditConfig_.MAP_HEIGHT;y++)
 	{
-		for (int x = 0; x < MAP_WIDTH;x++)
+		for (int x = 0; x < mapEditConfig_.MAP_WIDTH;x++)
 		{
 
-			int touchX = (mx - mapEditArea_.x) / MAP_IMAGE_SIZE;
-			int touchY = (my - mapEditArea_.y) / MAP_IMAGE_SIZE;
+			int touchX = (mx - mapEditArea_.x) / mapEditConfig_.MAP_IMAGE_SIZE;
+			int touchY = (my - mapEditArea_.y) / mapEditConfig_.MAP_IMAGE_SIZE;
 			if ((touchX == x) && (touchY == y))
 			{
 				p->x = x;
@@ -374,13 +382,13 @@ void MapEdit::SaveMapData()
 
 		MapChip* mc = FindGameObject<MapChip>();
 
-		for (int y = 0; y < MAP_HEIGHT;y++)
+		for (int y = 0; y < mapEditConfig_.MAP_HEIGHT;y++)
 		{
 
-			for (int x = 0; x < MAP_WIDTH;x++)
+			for (int x = 0; x < mapEditConfig_.MAP_WIDTH;x++)
 			{
 				int index = -1;
-				int handle = myMap_[y * MAP_WIDTH + x];
+				int handle = myMap_[y * mapEditConfig_.MAP_WIDTH + x];
 				if (handle != -1)
 				{
 					index = mc->GetChipIndex(handle);
@@ -389,7 +397,7 @@ void MapEdit::SaveMapData()
 				
 				openfile << index;
 				//openfile << index << ",";
-				if (x != MAP_WIDTH - 1)
+				if (x != mapEditConfig_.MAP_WIDTH - 1)
 				{
 					openfile << ",";
 				}
@@ -493,20 +501,20 @@ void MapEdit::LoadMapData()
 		}
 #if 0
 		inputfile << "#header" << std::endl;
-		inputfile << "WIDTH " << MAP_WIDTH << std::endl;
-		inputfile << "HEIGHT " << MAP_HEIGHT << std::endl;
+		inputfile << "WIDTH " << mapEditConfig_.MAP_WIDTH << std::endl;
+		inputfile << "HEIGHT " << mapEditConfig_.MAP_HEIGHT << std::endl;
 		inputfile << std::endl;
 		inputfile << "#data" << std::endl;
 
 		MapChip* mc = FindGameObject<MapChip>();
 
-		for (int y = 0; y < MAP_HEIGHT;y++)
+		for (int y = 0; y < mapEditConfig_.mapEditConfig_.MAP_HEIGHT;y++)
 		{
 
-			for (int x = 0; x < MAP_WIDTH;x++)
+			for (int x = 0; x < mapEditConfig_.MAP_WIDTH;x++)
 			{
 				int index = -1;
-				int handle = myMap_[y * MAP_WIDTH + x];
+				int handle = myMap_[y * mapEditConfig_.MAP_WIDTH + x];
 				if (handle != -1)
 				{
 					index = mc->GetChipIndex(handle);

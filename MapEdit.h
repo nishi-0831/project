@@ -2,16 +2,24 @@
 #include "Library/GameObject.h"
 #include <vector>
 #include "global.h"
+#include "MapEditConfig.h"
 namespace
 {
     //20かけ20で400、32のサイズのマスでグリッドを作る
+    int MAP_WIDTH;
+    int MAP_HEIGHT;
+    int MAP_IMAGE_SIZE;
+    int LEFT_MARGIN;
+    int TOP_MARGIN;
+
+    /*
     const int MAP_WIDTH = { 20 };
     const int MAP_HEIGHT = { 20 };
     const int MAP_IMAGE_SIZE = { 32 };
     //今は使わない
     const int LEFT_MARGIN = { 100 };
     const int TOP_MARGIN = { 40 };
-
+    */
 }
 class MapEdit :
     public GameObject
@@ -20,6 +28,7 @@ class MapEdit :
     //ツールでエディットしたやつを持ってくる
     std::vector<int> myMap_;
 	Rect mapEditArea_;
+    MapEditConfig mapEditConfig_;
 public:
     MapEdit();
     ~MapEdit();
