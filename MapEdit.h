@@ -25,6 +25,8 @@ public:
     ~MapEdit();
     void Update() override;
     void Draw() override;
+    void DrawSelectRect();
+    void SetSelectRect();
     void SetMap(int value);
     void GetMap(Point p) const;
     //value‚Å–ž‚½‚·
@@ -34,7 +36,6 @@ public:
     void RectFill(int value);
     Point ToSafeNeighbor(Point start, Point movement);
     bool IsInMapEdit(Point* p);
-
     void SaveMapData();
     
     void LoadMapData();
