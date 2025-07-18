@@ -18,6 +18,15 @@ namespace Input {
 
 	std::bitset<(int)Mouse::MAX> mousePrevBitset;
 	std::bitset<(int)Mouse::MAX> mouseNowBitset;
+
+	
+	Point down;//押し込んだ時の座標
+	Point up;//押し込んでから離した時の座標
+	static bool rectSelecting;
+	static Rect rect;
+	static Point mousePos;
+
+
 }
 
 void Input::KeyStateUpdate()
@@ -60,7 +69,34 @@ void Input::KeyStateUpdate()
 		
 	}
 	
-	
+	int x, y;
+	GetMousePoint(&x, &y);
+	mousePos.x = x;
+	mousePos.y = y;
+
+	if (IsButtonDown(Mouse::MIDDLE))
+	{
+		/*int x, y;
+		GetMousePoint(&x, &y);
+		down.x = x;
+		down.y = y;*/
+		down = mousePos;
+		rectSelecting = true;
+	}
+
+	if (IsButtonKeep(Mouse::MIDDLE) && rectSelecting)
+	{
+		/*int x, y;
+		GetMousePoint(&x, &y);
+		up.x = x;
+		up.y = y;*/
+		up = mousePos;
+	}
+
+	if (IsButtonUp(Mouse::MIDDLE) && rectSelecting)
+	{
+		rectSelecting = false;
+	}
 	
 
 	//キーの状態を取得する関数
@@ -77,15 +113,47 @@ void Input::KeyStateUpdate()
 	{
 		//DxLib::printfDx("マウスが押されている!\n");
 	}
-
-
-
-	
-	
 }
 //mouseNow,mousePrev == 0 押されていない、 != 0 は押されている
 
+Rect Input::GetSelectRect()
+{
+	if (down.x < up.x)
+	{
+		rect.x = down.x;
+		rect.w = up.x - down.x;
+	}
+	//離した時
+	else
+	{
+		rect.x = up.x;
+		rect.w = down.x - up.x;
+	}
 
+	///y
+	if (down.y < up.y)
+	{
+		rect.y = down.y;
+		rect.h = up.y - down.y;
+	}
+	//離した時
+	else
+	{
+		rect.y = up.y;
+		rect.h = down.y - up.y;
+	}
+	return rect;
+}
+
+bool Input::IsSelectRect()
+{
+	return rectSelecting;
+}
+
+bool Input::IsMouseInRect(const Rect& rect)
+{
+	return IsPointInRect(mousePos,rect);
+}
 
 bool Input::IsKeyUp(int keyCode)
 {
@@ -190,5 +258,7 @@ bool Input::IsButtonKeep(int button)
 {
 	return (mouseNowBitset.test(button)) && (mousePrevBitset.test(button));
 }
+
+
 
 

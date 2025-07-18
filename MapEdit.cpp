@@ -17,7 +17,8 @@ namespace
 	//std::map<int, int> myMapMap;
 	Point down = Point{0,0};
 	Point up = Point{ 0,0 };
-	bool rectSelecting = false;
+	//bool rectSelecting = false;
+	bool isUsedMapEdit = false;
 	Rect rect;
 	Rect gridRect;
 }
@@ -62,6 +63,8 @@ void MapEdit::Update()
 	{
 		LoadMapData();
 	}
+
+#if 0
 	if (Input::IsButtonDown(Input::Mouse::MIDDLE))
 	{
 		int x, y;
@@ -81,24 +84,45 @@ void MapEdit::Update()
 	{
 		rectSelecting = false;
 		//downとupでrectFill()!!!
-		MapChip* mapChip = FindGameObject<MapChip>();
-		RectFill(mapChip->GetHImage());
+		//MapChip* mapChip = FindGameObject<MapChip>();
+		//RectFill(mapChip->GetHImage());
 		//RectFill(1);
+	}
+#endif
+	if (Input::IsButtonDown(Input::Mouse::MIDDLE))
+	{
+		if (Input::IsMouseInRect(mapEditArea_))
+		{
+			isUsedMapEdit = true;
+		}
+	}
+	if (Input::IsButtonUp(Input::Mouse::MIDDLE))
+	{
+		if (isUsedMapEdit)
+		{
+			MapChip* mapChip = FindGameObject<MapChip>();
+			RectFill(mapChip->GetHImage());
+			//RectFill(1);
+			isUsedMapEdit = false;
+		}
 	}
 }
 
 void MapEdit::Draw()
 {
 	ImGui::Begin("Rect");
-	SetSelectRect();
+	
+	//rect = Input::GetSelectRect();
 	ImGui::Text("down(%i,%i)", down.x, down.y);
 	ImGui::Text("up(%i,%i)", up.x, up.y);
 	ImGui::Text("rect(%i,%i,%i,%i)", rect.x, rect.y, rect.w, rect.h);
 	ImGui::Text("gridRect(%i,%i,%i,%i)", gridRect.x, gridRect.y, gridRect.w, gridRect.h);
-
+	bool select = Input::IsSelectRect();
+	ImGui::Checkbox("rectselecting", &select);
+	ImGui::Checkbox("isUsedMapEdit", &isUsedMapEdit);
 	ImGui::End();
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
-	if (rectSelecting)
+	if (isUsedMapEdit)
 	{
 		DrawSelectRect();
 
@@ -160,10 +184,10 @@ void MapEdit::Draw()
 
 void MapEdit::DrawSelectRect()
 {
-	
+	rect = Input::GetSelectRect();
 	DrawBox(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h, GetColor(0, 200, 0), FALSE);
 }
-
+#if 0
 void MapEdit::SetSelectRect()
 {
 	//押し込んだ時の座標と、離した時の座標で矩形を作る
@@ -197,9 +221,11 @@ void MapEdit::SetSelectRect()
 		rect.h = down.y - up.y;
 	}
 }
+#endif
 void MapEdit::RectFill(int value)
 {
-	SetSelectRect();
+	//SetSelectRect();
+	rect = Input::GetSelectRect();
 	gridRect =
 	{
 		std::clamp((rect.x - mapEditConfig_.LEFT_MARGIN) / mapEditConfig_.MAP_IMAGE_SIZE,0,mapEditConfig_.MAP_WIDTH-1),

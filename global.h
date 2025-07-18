@@ -75,10 +75,23 @@
 			{0,0}
 	};
 
-namespace
-{
-	const int CHA_SIZE = 32;//キャラクターのサイズ
+	static bool IsPointInRect(const Point& point,const Rect& rect)
+	{
+		bool ret = false;
 
-	const int STAGE_WIDTH = 39;
-	const int STAGE_HEIGHT = 21;
-}
+		if(rect.x <= point.x && rect.x + rect.w >= point.x
+		&& rect.y <= point.y && rect.y + rect.h >= point.y)
+		{
+			ret = true;
+		}
+
+		return ret;
+	}
+
+//namespace
+//{
+//	const int CHA_SIZE = 32;//キャラクターのサイズ
+//
+//	const int STAGE_WIDTH = 39;
+//	const int STAGE_HEIGHT = 21;
+//}

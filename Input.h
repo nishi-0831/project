@@ -1,5 +1,5 @@
 #pragma once
-
+#include "global.h"
 
 namespace Input {
 	enum Mouse
@@ -32,4 +32,8 @@ namespace Input {
 	bool IsButtonDown(int button);
 	bool IsButtonUp(int button);
 	bool IsButtonKeep(int button);
+
+	Rect GetSelectRect();
+	bool IsSelectRect();
+	bool IsMouseInRect(const Rect& rect);
 }

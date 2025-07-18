@@ -19,7 +19,12 @@ namespace
 	//const int mapChipConfig_.TILES_X = { 16 };
 	//const int mapChipConfig_.TILES_Y = { 12 };
 	//マップのチップ数
-	
+	Point down = Point{ 0,0 };
+	Point up = Point{ 0,0 };
+	//bool rectSelecting = false;
+	Rect rect;
+	Rect gridRect;
+	bool isUsedMapChip;
 	
 
 #if 0
@@ -44,6 +49,7 @@ namespace
 	std::map<int, int> bgChipIndexMap;
 #endif
 	std::pair<Point, int> selectedChip;
+	std::vector<std::pair<Point, int>> selectedChipVec;
 	//std::pair<int, int> selectedChip;
 	/*struct BgHandle
 	{
@@ -81,6 +87,24 @@ void MapChip::Input()
 	tipOffsetX_ = std::clamp(tipOffsetX_, 0, mapChipConfig_.TILES_X -mapChipConfig_.MAPCHIP_VIEW_X);
 	tipOffsetY_ = std::clamp(tipOffsetY_, 0, mapChipConfig_.TILES_Y - mapChipConfig_.MAPCHIP_VIEW_Y);
 	//mapChipArea_.x = std::clamp(mapChipArea_.x+(dir * mapChipConfig_.TILE_PIX_SIZE), Screen::WIDTH - MAP_CHIP_WIN_WIDTH, Screen::WIDTH);
+
+	if (Input::IsButtonDown(Input::Mouse::MIDDLE))
+	{
+		if (Input::IsMouseInRect(mapChipArea_))
+		{
+			isUsedMapChip = true;
+		}
+	}
+	if (Input::IsButtonUp(Input::Mouse::MIDDLE))
+	{
+		if (isUsedMapChip)
+		{
+			//MapChip* mapChip = FindGameObject<MapChip>();
+			//RectFill(mapChip->GetHImage());
+			//RectFill(1);
+			isUsedMapChip = false;
+		}
+	}
 #endif
 }
 Point MapChip::GetViewOrigin() const

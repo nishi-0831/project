@@ -16,7 +16,7 @@ private:
 
 	bool isUpdate_;
 	bool isInMapChipArea_;
-	Point selected_;
+	//Point selected_;
 	Rect mapChipArea_;
 	//int selectedIndex_;
 	MapChipConfig mapChipConfig_;
