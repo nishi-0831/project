@@ -18,7 +18,7 @@ private:
 	bool isInMapChipArea_;
 	Point selected_;
 	Rect mapChipArea_;
-	int selectedIndex_;
+	//int selectedIndex_;
 	MapChipConfig mapChipConfig_;
 	Point GetViewOrigin() const;
 public:
