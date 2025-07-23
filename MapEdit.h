@@ -1,7 +1,7 @@
 #pragma once
 #include "Library/GameObject.h"
 #include <vector>
-
+#include "global.h"
 namespace
 {
     //20かけ20で400、32のサイズのマスでグリッドを作る
@@ -19,10 +19,14 @@ class MapEdit :
     //格子模様書く
     //ツールでエディットしたやつを持ってくる
     std::vector<int> myMap_;
+	Rect mapEditArea_;
 public:
     MapEdit();
     ~MapEdit();
     void Update() override;
     void Draw() override;
+    void SetMap(int value);
+    void GetMap(Point p) const;
+    bool IsInMapEdit(Point* p);
 };
 

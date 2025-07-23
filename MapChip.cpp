@@ -5,7 +5,7 @@
 #include "global.h"
 #include <assert.h>
 #include "Input.h"
-
+#include "MapEdit.h"
 #define test 0
 
 namespace
@@ -134,9 +134,9 @@ void MapChip::Update()
 #else
 			selectedChip.second = bgHandleMap[point.y * MAP_CHIP_NUM_X + point.x];
 #endif
-		
-			
 		}
+		
+		
 	}
 	
 }
@@ -170,6 +170,12 @@ void MapChip::Draw()
 			}
 		}
 	}
+	Point mousePos;
+	if (GetMousePoint(&mousePos.x, &mousePos.y) == -1)
+	{
+		return;
+	}
+	DrawGraph(mousePos.x , mousePos.y, selectedChip.second,TRUE);
 	if (IsInMapChipArea(&point))
 	{
 		DrawBox(mapChipArea_.x + point.x * IMAGE_SIZE, point.y * IMAGE_SIZE, mapChipArea_.x + point.x * IMAGE_SIZE + IMAGE_SIZE, point.y * IMAGE_SIZE + IMAGE_SIZE, GetColor(0, 255, 0), false, 5);
@@ -252,5 +258,10 @@ bool MapChip::IsInMapChipArea(Point* point)
 		}
 	}
 	return ret;
+}
+
+int MapChip::GetHImage()
+{
+	return selectedChip.second;
 }
 

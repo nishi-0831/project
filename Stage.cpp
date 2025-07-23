@@ -87,7 +87,23 @@ void Stage::Update()
 		//DxLib::printfDx("右が押されている!\n");
 	}
 
-	
+	if (Input::IsButtonKeep(Input::Mouse::LEFT))
+	{
+		int hImage = mapChip_->GetHImage();
+		mapEdit_->SetMap(hImage);
+	}
+
+	//消しゴム的な機能
+	if (Input::IsButtonKeep(Input::Mouse::RIGHT))
+	{
+		int hImage = -1;
+		mapEdit_->SetMap(hImage);
+	}
+	/*if (Input::IsButtonDown(Input::Mouse::LEFT))
+	{
+		int hImage = mapChip_->GetHImage();
+		mapEdit_->SetMap(hImage);
+	}*/
 }
 
 void Stage::Draw()
@@ -114,4 +130,9 @@ void Stage::Draw()
 	//		DrawGraph(j * IMAGE_SIZE, i * IMAGE_SIZE, bgHandleVec_[chi], TRUE);*/
 	//	}
 	//}
+}
+
+int Stage::GetHImage()
+{
+	return 0;
 }

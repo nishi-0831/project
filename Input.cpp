@@ -174,7 +174,7 @@ bool Input::IsUp(int mouse)
 void Input::Calculate()
 {
 
-}
+}	
 
 bool Input::IsButtonDown(int button)
 {
