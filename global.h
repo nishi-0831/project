@@ -19,8 +19,33 @@
 		{
 			return (x == other.x && y == other.y);
 		}
+		
 	};
-
+	inline Point operator+(const Point& lhs, const Point& rhs)
+	{
+		return Point{ lhs.x + rhs.x, lhs.y + rhs.y };
+	}
+	inline Point operator-(const Point& lhs, const Point& rhs)
+	{
+		return Point{ lhs.x - rhs.x, lhs.y - rhs.y };
+	}
+	inline Point operator*(const Point& lhs, const int rhs)
+	{
+		return Point{ lhs.x * rhs, lhs.y * rhs };
+	}
+	inline Point operator*(const Point& lhs, const Point rhs)
+	{
+		return Point{ lhs.x * rhs.x, lhs.y * rhs.y };
+	}
+	inline Point operator/(const Point& lhs, const int rhs)
+	{
+		return Point{ lhs.x / rhs, lhs.y / rhs };
+	}
+	inline Point operator/(const Point& lhs, const Point rhs)
+	{
+		return Point{ lhs.x / rhs.x, lhs.y / rhs.y };
+	}
+	
 	namespace std
 	{
 		template<>
@@ -55,7 +80,27 @@
 		int y;//¶ãy
 		int w;//•
 		int h;//‚‚³
+		Rect operator+(const Rect& other) const
+		{
+			return  Rect{
+				x + other.x,
+					y + other.y,
+					w + other.w,
+					h + other.h
+			};
+		}
+		Rect operator-(const Rect& other) const
+		{
+			return  Rect{
+				x - other.x,
+					y - other.y,
+					w - other.w,
+					h - other.h
+			};
+		}
 	};
+	
+	
 
 	enum DIR
 	{

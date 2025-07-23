@@ -21,6 +21,12 @@ private:
 	//int selectedIndex_;
 	MapChipConfig mapChipConfig_;
 	Point GetViewOrigin() const;
+	int GetCorrectIndex(int x, int y) const;
+
+	void DrawMouseOverlapChip();
+	void DrawSelectedChip();
+	void DrawSelectedChipFrame();
+	void DrawMapChipWindow();
 public:
 	std::vector<int> bgHandle;
 	MapChip();
@@ -29,9 +35,13 @@ public:
 	void Draw() override;
 	void LoadIni();
 	bool IsInMapChipArea(Point* point);
+	//void OnDownMiddleButton();
 	//void File()
+	void RectSelect();
+	const std::vector<std::pair<Point,int>>& GetSelectedChipVec();
 	int GetHImage();
 	int GetChipIndex(int handle);
 	int GetChipHandle(int index);
+
 };
 

@@ -35,16 +35,13 @@
 //{17,17,17,17,17,17,17,17,17,17,17,17,17,17,80,80,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17}
 //};
 
+namespace
+{
+	Rect rect;
+}
 Stage::Stage()
 	: GameObject()
 {
-	
-	//bgHandleVec_.resize(MAP_CHIP_WIDTH * MAP_CHIP_HEIGHT,-1);
-	//bgHandleVec_ = std::vector<int>(MAP_CHIP_WIDTH * MAP_CHIP_HEIGHT, -1);
-	////vectorの中の人、データにアクセスする
-	//LoadDivGraph("bg.png",MAP_CHIP_WIDTH * MAP_CHIP_HEIGHT, MAP_CHIP_WIDTH, MAP_CHIP_HEIGHT, IMAGE_SIZE, IMAGE_SIZE,
-	//	bgHandleVec_.data());
-	//hImage = LoadGraph("bg.png", 0);
 
 	mapChip_ = new MapChip();
 	mapEdit_ = new MapEdit();
@@ -98,52 +95,41 @@ void Stage::Update()
 	}
 	if (Input::IsButtonKeep(Input::Mouse::LEFT))
 	{
-		
-		int hImage = mapChip_->GetHImage();
-		mapEdit_->SetMap(hImage);
+		//int hImage = mapChip_->GetHImage();
+		//mapEdit_->SetMap(hImage);
+		mapEdit_->SetMapVec(mapChip_->GetSelectedChipVec());
 	}
 	if (Input::IsButtonDown(Input::Mouse::RIGHT))
+	{
+		
+	}
+	//消しゴム的な機能
+	if (Input::IsButtonKeep(Input::Mouse::RIGHT))
 	{
 		if (Input::IsKeepKeyDown(KEY_INPUT_LSHIFT))
 		{
 			int hImage = -1;
 			mapEdit_->Fill(hImage);
 		}
-	}
-	//消しゴム的な機能
-	if (Input::IsButtonKeep(Input::Mouse::RIGHT))
-	{
 		int hImage = -1;
 		mapEdit_->SetMap(hImage);
 	}
-	
+	if (Input::IsButtonUp(Input::Mouse::RIGHT))
+	{
+		int hImage = -1;
+		mapEdit_->Fill(hImage);
+	}
 	
 }
 
 void Stage::Draw()
 {
-	//for (int i = 0;i < MAP_HEIGHT;i++)
-	//{
-	//	for (int j = 0;j < MAP_WIDTH;j++)
-	//	{
-	//		//グリッド描画していく
-
-	//		//縦線
-	//		int verticalLineX = topLeft_x + x * IMAGE_SIZE;
-	//		DrawLine(verticalLineX, 0, verticalLineX, MAP_CHIP_WIN_HEIGHT, GetColor(255, 255, 255));
-	//		//横線も
-	//		int holizontalLineY = y * IMAGE_SIZE;
-	//		DrawLine(topLeft_x, holizontalLineY, Screen::WIDTH, holizontalLineY, GetColor(255, 255, 255));
-
-	//		int chi = myMap[i][j];
-
-	//		/*if (bgHandleVec_[chi] == -1)
-	//		{
-	//			continue;
-	//		}
-	//		DrawGraph(j * IMAGE_SIZE, i * IMAGE_SIZE, bgHandleVec_[chi], TRUE);*/
-	//	}
-	//}
+	if (!Input::IsSelectRect())
+	{
+		return;
+	}
+	rect = Input::GetSelectRect();
+	DrawBox(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h, GetColor(0, 200, 0), FALSE);
 }
 
 int Stage::GetHImage()

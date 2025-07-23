@@ -155,6 +155,11 @@ bool Input::IsMouseInRect(const Rect& rect)
 	return IsPointInRect(mousePos,rect);
 }
 
+const Point& Input::GetMousePos()
+{
+	return mousePos;
+}
+
 bool Input::IsKeyUp(int keyCode)
 {
 	return(key_up[keyCode]);

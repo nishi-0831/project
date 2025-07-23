@@ -26,19 +26,6 @@ namespace
 MapEdit::MapEdit()
 	: GameObject(), mapEditConfig_(GetMapEditConfig())
 {
-	//mapChipArea_ = {
-	/*Screen::WIDTH - MAP_CHIP_WIN_WIDTH,
-		0,
-		Screen::WIDTH,
-		MAP_CHIP_WIN_HEIGHT*/
-		//};
-
-	//mapEditConfig_.MAP_WIDTH = mapEditConfig_.MAP_WIDTH;
-		//mapEditConfig_.MAP_HEIGHT = mapEditConfig_.MAP_HEIGHT;
-		//mapEditConfig_.MAP_IMAGE_SIZE = mapEditConfig_.MAP_IMAGE_SIZE;
-		//mapEditConfig_.LEFT_MARGIN = mapEditConfig_.LEFT_MARGIN;
-		//mapEditConfig_.TOP_MARGIN = mapEditConfig_.TOP_MARGIN;
-
 	myMap_.resize(mapEditConfig_.MAP_WIDTH * mapEditConfig_.MAP_HEIGHT, -1);//初期値を-1で20*20のマップ
 	mapEditArea_ = {
 		mapEditConfig_.LEFT_MARGIN,
@@ -64,31 +51,6 @@ void MapEdit::Update()
 		LoadMapData();
 	}
 
-#if 0
-	if (Input::IsButtonDown(Input::Mouse::MIDDLE))
-	{
-		int x, y;
-		GetMousePoint(&x, &y);
-		down.x = x;
-		down.y = y;
-		rectSelecting = true;
-	}
-	if (Input::IsButtonKeep(Input::Mouse::MIDDLE) && rectSelecting)
-	{
-		int x, y;
-		GetMousePoint(&x, &y);
-		up.x = x;
-		up.y = y;
-	}
-	if (Input::IsButtonUp(Input::Mouse::MIDDLE) && rectSelecting)
-	{
-		rectSelecting = false;
-		//downとupでrectFill()!!!
-		//MapChip* mapChip = FindGameObject<MapChip>();
-		//RectFill(mapChip->GetHImage());
-		//RectFill(1);
-	}
-#endif
 	if (Input::IsButtonDown(Input::Mouse::MIDDLE))
 	{
 		if (Input::IsMouseInRect(mapEditArea_))
@@ -100,9 +62,15 @@ void MapEdit::Update()
 	{
 		if (isUsedMapEdit)
 		{
-			MapChip* mapChip = FindGameObject<MapChip>();
-			RectFill(mapChip->GetHImage());
-			//RectFill(1);
+			if (Input::IsKeepKeyDown(KEY_INPUT_LSHIFT))
+			{
+				RectFill(-1);
+			}
+			else
+			{
+				MapChip* mapChip = FindGameObject<MapChip>();
+				RectFill(mapChip->GetHImage());
+			}
 			isUsedMapEdit = false;
 		}
 	}
@@ -127,8 +95,6 @@ void MapEdit::Draw()
 		DrawSelectRect();
 
 	}
-
-
 
 	int topLeftX = 0 + mapEditConfig_.LEFT_MARGIN;
 	int topLeftY = 0 + mapEditConfig_.TOP_MARGIN;
@@ -185,7 +151,7 @@ void MapEdit::Draw()
 void MapEdit::DrawSelectRect()
 {
 	rect = Input::GetSelectRect();
-	DrawBox(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h, GetColor(0, 200, 0), FALSE);
+	/*DrawBox(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h, GetColor(0, 200, 0), FALSE);*/
 }
 #if 0
 void MapEdit::SetSelectRect()
@@ -235,7 +201,7 @@ void MapEdit::RectFill(int value)
 	};
 	
 
-	//xが-だとそもそも評価されなくなる
+	
 	/*int i = gridRect.x;
 	while ((i <= gridRect.w && i < mapEditConfig_.MAP_WIDTH ) && i >= 0)
 	{
@@ -272,6 +238,32 @@ void MapEdit::SetMap(int value)
 	{
 		int idx = p.x + mapEditConfig_.MAP_WIDTH * p.y;
 		myMap_[idx] = value;
+	}
+}
+
+void MapEdit::SetMapVec(const std::vector<std::pair<Point, int>>& vec)
+{
+	Point p = { 0,1 };
+	if (IsInMapEdit(&p))
+	{
+		//int idx = p.x + mapEditConfig_.MAP_WIDTH * p.y;
+		for (auto& chip : vec)
+		{
+			Point offset = vec[0].first;
+			offset = chip.first - offset;
+			
+			Point point = offset + p;
+			point.x = std::clamp(point.x, 0, mapEditConfig_.MAP_WIDTH - 1);
+			point.y = std::clamp(point.y, 0, mapEditConfig_.MAP_HEIGHT - 1);
+
+			//int offsetIndex = idx + (offset.x + mapEditConfig_.MAP_WIDTH * offset.y);
+			int offsetIndex = (point.x + mapEditConfig_.MAP_WIDTH * point.y);
+
+			if (offsetIndex >= 0 && offsetIndex < myMap_.size())
+			{
+				myMap_[offsetIndex] = chip.second;
+			}
+		}
 	}
 }
 

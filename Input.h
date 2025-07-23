@@ -36,4 +36,5 @@ namespace Input {
 	Rect GetSelectRect();
 	bool IsSelectRect();
 	bool IsMouseInRect(const Rect& rect);
+	const Point& GetMousePos();
 }

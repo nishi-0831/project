@@ -24,6 +24,3 @@ public:
     int GetHImage();
 };
 
-//playsceneでstageクラスのインスタンスを作って、
-//playSceneに、bg.pngが表示される
-

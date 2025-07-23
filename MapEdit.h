@@ -1,6 +1,7 @@
 #pragma once
 #include "Library/GameObject.h"
 #include <vector>
+#include <algorithm>
 #include "global.h"
 #include "MapEditConfig.h"
 namespace
@@ -37,6 +38,7 @@ public:
     void DrawSelectRect();
     void SetSelectRect();
     void SetMap(int value);
+    void SetMapVec(const std::vector<std::pair<Point, int>>& vec);
     void GetMap(Point p) const;
     //value‚Å–ž‚½‚·
     void Fill(int value);
