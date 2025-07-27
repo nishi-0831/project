@@ -312,10 +312,10 @@ void MapChip::RegisterInputActions()
 
 	InputBinding middleDownBinding;
 	middleDownBinding.mouseButton = Mouse::MIDDLE;
-	RegisterAction("mapChip_rect_start", middleDownBinding, InputActionType::PRESSED,
+	RegisterAction("mapChip_rect_select_start", middleDownBinding, InputActionType::PRESSED,
 		context, [this]() { OnMiddleButtonDown(); });
 
-	RegisterAction("mapChip_rect_end", middleDownBinding, InputActionType::RELEASED,
+	RegisterAction("mapChip_rect_select_end", middleDownBinding, InputActionType::RELEASED,
 		context, [this]() { OnMiddleButtonUp(); });
 
 	InputBinding rightButtonBinding;

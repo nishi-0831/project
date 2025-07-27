@@ -58,10 +58,10 @@ void MapEdit::RegisterInputActions()
 
 	InputBinding middleDownBinding;
 	middleDownBinding.mouseButton = Mouse::MIDDLE;
-	RegisterAction("mapedit_rect_start", middleDownBinding,InputActionType::PRESSED,InputContext::MAP_EDIT,
+	RegisterAction("mapedit_rect_fill_start", middleDownBinding,InputActionType::PRESSED,InputContext::MAP_EDIT,
 		[this]() {OnMiddleButtonDown(); });
 
-	RegisterAction("mapedit_rect_end", middleDownBinding, InputActionType::RELEASED,
+	RegisterAction("mapedit_rect_fill_end", middleDownBinding, InputActionType::RELEASED,
 		InputContext::MAP_EDIT, [this]() { OnMiddleButtonUp(); });
 }
 
