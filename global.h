@@ -1,7 +1,8 @@
 #pragma once
+#include <functional>
+#include <vector>
 
-namespace
-{
+
 
 
 	//二次元ベクトル(整数)
@@ -14,7 +15,49 @@ namespace
 		{
 			return (x + x * y < rhs.x + rhs.x * rhs.y);
 		}
+		bool operator==(const Point& other)const
+		{
+			return (x == other.x && y == other.y);
+		}
+		
 	};
+	inline Point operator+(const Point& lhs, const Point& rhs)
+	{
+		return Point{ lhs.x + rhs.x, lhs.y + rhs.y };
+	}
+	inline Point operator-(const Point& lhs, const Point& rhs)
+	{
+		return Point{ lhs.x - rhs.x, lhs.y - rhs.y };
+	}
+	inline Point operator*(const Point& lhs, const int rhs)
+	{
+		return Point{ lhs.x * rhs, lhs.y * rhs };
+	}
+	inline Point operator*(const Point& lhs, const Point rhs)
+	{
+		return Point{ lhs.x * rhs.x, lhs.y * rhs.y };
+	}
+	inline Point operator/(const Point& lhs, const int rhs)
+	{
+		return Point{ lhs.x / rhs, lhs.y / rhs };
+	}
+	inline Point operator/(const Point& lhs, const Point rhs)
+	{
+		return Point{ lhs.x / rhs.x, lhs.y / rhs.y };
+	}
+	
+	namespace std
+	{
+		template<>
+		struct hash<Point>
+		{
+			size_t operator()(const Point& p) const
+			{
+				//例えば(18,0)と(0,18)が同じハッシュ値にならないように
+				return hash<int>()(p.x) ^ (hash<int>()(p.y) << 1);
+			}
+		};
+	}
 
 	inline Point Add(Point a, Point b)
 	{
@@ -37,7 +80,27 @@ namespace
 		int y;//左上y
 		int w;//幅
 		int h;//高さ
+		Rect operator+(const Rect& other) const
+		{
+			return  Rect{
+				x + other.x,
+					y + other.y,
+					w + other.w,
+					h + other.h
+			};
+		}
+		Rect operator-(const Rect& other) const
+		{
+			return  Rect{
+				x - other.x,
+					y - other.y,
+					w - other.w,
+					h - other.h
+			};
+		}
 	};
+	
+	
 
 	enum DIR
 	{
@@ -57,10 +120,23 @@ namespace
 			{0,0}
 	};
 
+	static bool IsPointInRect(const Point& point,const Rect& rect)
+	{
+		bool ret = false;
 
+		if(rect.x <= point.x && rect.x + rect.w >= point.x
+		&& rect.y <= point.y && rect.y + rect.h >= point.y)
+		{
+			ret = true;
+		}
 
-	const int CHA_SIZE = 32;//キャラクターのサイズ
+		return ret;
+	}
 
-	const int STAGE_WIDTH = 39;
-	const int STAGE_HEIGHT = 21;
-}
+//namespace
+//{
+//	const int CHA_SIZE = 32;//キャラクターのサイズ
+//
+//	const int STAGE_WIDTH = 39;
+//	const int STAGE_HEIGHT = 21;
+//}

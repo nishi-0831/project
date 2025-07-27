@@ -2,6 +2,7 @@
 #include "SceneManager.h"
 #include "ObjectManager.h"
 #include "../Input.h"
+#include "../InputManager.h"
 //#include "Time.h"
 #include <DxLib.h>
 
@@ -14,14 +15,12 @@ void AppInit()
 
 void AppUpdate()
 {
-	
 	SceneManager::Update();
 	ObjectManager::Update();
 }
 
 void AppDraw()
 {
-//	Time::Refresh();
 	SceneManager::Draw();
 	ObjectManager::Draw();
 }

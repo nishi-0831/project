@@ -91,11 +91,11 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(DXLIB);D:\DxLib_VC\プロジェクトに追加すべきファイル_VC用</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>C:\DxLib_VC3_24d\DxLib_VC\プロジェクトに追加すべきファイル_VC用</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(DXLIB);D:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;C:\DxLib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\DxLib_VC3_24d\DxLib_VC\プロジェクトに追加すべきファイル_VC用</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -124,14 +124,14 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(DXLIB);D:\DxLib_VC\プロジェクトに追加すべきファイル_VC用</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\DxLib_VC3_24d\DxLib_VC\プロジェクトに追加すべきファイル_VC用</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(DXLIB);D:\DxLib_VC\プロジェクトに追加すべきファイル_VC用;C:\DxLib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\DxLib_VC3_24d\DxLib_VC\プロジェクトに追加すべきファイル_VC用</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -147,6 +147,7 @@
     <ClInclude Include="ImGui\imstb_textedit.h" />
     <ClInclude Include="ImGui\imstb_truetype.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="InputManager.h" />
     <ClInclude Include="Library\App.h" />
     <ClInclude Include="Library\GameObject.h" />
     <ClInclude Include="Library\ObjectManager.h" />
@@ -154,7 +155,9 @@
     <ClInclude Include="Library\SceneManager.h" />
     <ClInclude Include="Library\Time.h" />
     <ClInclude Include="MapChip.h" />
+    <ClInclude Include="MapChipConfig.h" />
     <ClInclude Include="MapEdit.h" />
+    <ClInclude Include="MapEditConfig.h" />
     <ClInclude Include="Source\BootScene.h" />
     <ClInclude Include="Source\Screen.h" />
     <ClInclude Include="Source\PlayScene.h" />
@@ -172,18 +175,24 @@
     <ClCompile Include="ImGui\imgui_tables.cpp" />
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Library\App.cpp" />
     <ClCompile Include="Library\main.cpp" />
     <ClCompile Include="Library\ObjectManager.cpp" />
     <ClCompile Include="Library\SceneManager.cpp" />
     <ClCompile Include="Library\Time.cpp" />
     <ClCompile Include="MapChip.cpp" />
+    <ClCompile Include="MapChipConfig.cpp" />
     <ClCompile Include="MapEdit.cpp" />
+    <ClCompile Include="MapEditConfig.cpp" />
     <ClCompile Include="Source\BootScene.cpp" />
     <ClCompile Include="Source\PlayScene.cpp" />
     <ClCompile Include="Source\SceneFactory.cpp" />
     <ClCompile Include="Source\TitleScene.cpp" />
     <ClCompile Include="Stage.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="mySetup.ini" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
