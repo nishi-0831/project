@@ -5,11 +5,11 @@
 #include "global.h"
 #include <assert.h>
 #include "Input.h"
+#include "InputManager.h"
 #include "MapEdit.h"
 #include <algorithm>
 #include <WinBase.h>
 #include <string>
-#include <algorithm>
 #define test 0
 
 namespace
@@ -41,25 +41,28 @@ namespace
 
 
 }
+
+using namespace Input;
+
 void MapChip::Input()
 {
-#if 1
+#if 0
 	int dir=0;
-	if (Input::IsKeyDown(KEY_INPUT_D))
+	if (IsKeyDown(KEY_INPUT_D))
 	{
 		tipOffsetX_ += 1;
 		dir = 1;
 	}
-	if (Input::IsKeyDown(KEY_INPUT_A))
+	if (IsKeyDown(KEY_INPUT_A))
 	{
 		tipOffsetX_ -= 1;
 		dir = -1;
 	}
-	if (Input::IsKeyDown(KEY_INPUT_W))
+	if (IsKeyDown(KEY_INPUT_W))
 	{
 		tipOffsetY_ -= 1;
 	}
-	if (Input::IsKeyDown(KEY_INPUT_S))
+	if (IsKeyDown(KEY_INPUT_S))
 	{
 		tipOffsetY_ += 1;
 	}
@@ -68,14 +71,14 @@ void MapChip::Input()
 	tipOffsetY_ = std::clamp(tipOffsetY_, 0, mapChipConfig_.TILES_Y - mapChipConfig_.MAPCHIP_VIEW_Y);
 	//mapChipArea_.x = std::clamp(mapChipArea_.x+(dir * mapChipConfig_.TILE_PIX_SIZE), Screen::WIDTH - MAP_CHIP_WIN_WIDTH, Screen::WIDTH);
 
-	if (Input::IsButtonDown(Input::Mouse::MIDDLE))
+	if (IsButtonDown(Mouse::MIDDLE))
 	{
-		if (Input::IsMouseInRect(mapChipArea_))
+		if (IsMouseInRect(mapChipArea_))
 		{
 			isUsedMapChip = true;
 		}
 	}
-	if (Input::IsButtonUp(Input::Mouse::MIDDLE))
+	if (IsButtonUp(Mouse::MIDDLE))
 	{
 		//MapChip内で押してから離した
 		if (isUsedMapChip)
@@ -102,14 +105,13 @@ void MapChip::DrawMouseOverlapChip()
 	//マウスカーソルが重なっているタイルを塗る?
 	if (IsInMapChipArea(&point))
 	{
-		DrawBox(mapChipArea_.x + point.x * mapChipConfig_.TILE_PIX_SIZE, point.y * mapChipConfig_.TILE_PIX_SIZE, mapChipArea_.x + point.x * mapChipConfig_.TILE_PIX_SIZE + mapChipConfig_.TILE_PIX_SIZE, point.y * mapChipConfig_.TILE_PIX_SIZE + mapChipConfig_.TILE_PIX_SIZE, GetColor(0, 255, 0), false, 5);
+		DrawBoxAA(mapChipArea_.x + point.x * mapChipConfig_.TILE_PIX_SIZE, point.y * mapChipConfig_.TILE_PIX_SIZE, mapChipArea_.x + point.x * mapChipConfig_.TILE_PIX_SIZE + mapChipConfig_.TILE_PIX_SIZE, point.y * mapChipConfig_.TILE_PIX_SIZE + mapChipConfig_.TILE_PIX_SIZE, GetColor(0, 255, 0), false, 5);
 	}
 }
 void MapChip::DrawSelectedChip()
 {
-	const Point& mousePos = Input::GetMousePos();
-	//現在選択中のタイルの画像をマウスの場所に描画
-	DrawGraph(mousePos.x, mousePos.y, selectedChip.second, TRUE);
+	const Point& mousePos = GetMousePos();
+	
 
 	
 	//selectedChipVecを塗る
@@ -139,7 +141,7 @@ void MapChip::DrawSelectedChipFrame()
 	//int py = selectedChip.first.y * mapChipConfig_.TILE_PIX_SIZE;
 	if (mapChipArea_.x < px || mapChipArea_.x + mapChipArea_.w < px + mapChipConfig_.TILE_PIX_SIZE)
 	{
-		DrawBox(px,
+		DrawBoxAA(px,
 			py,
 			px + mapChipConfig_.TILE_PIX_SIZE,
 			py + mapChipConfig_.TILE_PIX_SIZE, GetColor(0, 255, 0), false, 5);
@@ -220,14 +222,10 @@ MapChip::MapChip()
 #endif
 		
 	}
-	/*LoadDivGraph("bg.png",
-		mapChipConfig_.TILES_X * mapChipConfig_.TILES_Y,
-		mapChipConfig_.TILES_X, mapChipConfig_.TILES_Y,
-		mapChipConfig_.TILE_PIX_SIZE, mapChipConfig_.TILE_PIX_SIZE,
-		bgHandleMap.hImages.data());*/
-
-	//for()
-	SetDrawOrder(-1);
+	
+	//SetDrawOrder(-1);
+	RegisterInputActions();
+	SetInputContextArea(mapChipArea_, InputContext::MAP_CHIP);
 }
 
 MapChip::~MapChip()
@@ -244,6 +242,8 @@ MapChip::~MapChip()
 
 void MapChip::Update()
 {
+	//InputManager::GetInstance().SetContext(InputContext::MAP_CHIP);
+
 	Input();
 	
 	Point mousePos;
@@ -262,7 +262,7 @@ void MapChip::Update()
 	{
 		isInMapChipArea_ = false;
 	}
-	if (Input::IsButtonDown(Input::Mouse::LEFT))
+	if (IsButtonDown(Mouse::LEFT))
 	{
 		Point point = { 0,0 };
 		if (IsInMapChipArea(&point))
@@ -281,9 +281,95 @@ void MapChip::Update()
 	
 }
 
+void MapChip::RegisterInputActions()
+{
+	InputManager& inputManager = InputManager::GetInstance();
+	InputContext context = InputContext::MAP_CHIP;
+
+	RegisterAction("move_right", inputManager.CreateKeyBinding(KEY_INPUT_D),
+		InputActionType::PRESSED, context, [this]() {OnMovement(1, 0); });
+
+	RegisterAction("move_left", inputManager.CreateKeyBinding(KEY_INPUT_A),
+		InputActionType::PRESSED, context,
+		[this]() { OnMovement(-1, 0); });
+
+	RegisterAction("move_up", inputManager.CreateKeyBinding(KEY_INPUT_W),
+		InputActionType::PRESSED, context,
+		[this]() { OnMovement(0, -1); });
+
+	RegisterAction("move_down", inputManager.CreateKeyBinding(KEY_INPUT_S),
+		InputActionType::PRESSED, context,
+		[this]() { OnMovement(0, 1); });
+
+	RegisterAction("select", inputManager.CreateKeyBinding(KEY_INPUT_LEFT),
+		InputActionType::PRESSED, context,
+		[this]() {OnSelection(); });
+
+	RegisterAction("select", inputManager.CreateKeyBinding(KEY_INPUT_LEFT),
+		InputActionType::RELEASED, context,
+		[this]() {OnRectSelection(); });
+	
+
+	InputBinding middleDownBinding;
+	middleDownBinding.mouseButton = Mouse::MIDDLE;
+	RegisterAction("mapChip_rect_start", middleDownBinding, InputActionType::PRESSED,
+		context, [this]() { OnMiddleButtonDown(); });
+
+	RegisterAction("mapChip_rect_end", middleDownBinding, InputActionType::RELEASED,
+		context, [this]() { OnMiddleButtonUp(); });
+
+	InputBinding rightButtonBinding;
+	rightButtonBinding.mouseButton = Mouse::RIGHT;
+	RegisterAction("mapChip_erase_selectChip", rightButtonBinding, InputActionType::PRESSED,
+		context, [this]() {OnRightButtonDown(); });
+}
+
+void MapChip::OnMovement(int x, int y)
+{
+	tipOffsetX_ += x;
+	tipOffsetY_ += y;
+
+	tipOffsetX_ = std::clamp(tipOffsetX_, 0, mapChipConfig_.TILES_X - mapChipConfig_.MAPCHIP_VIEW_X);
+	tipOffsetY_ = std::clamp(tipOffsetY_, 0, mapChipConfig_.TILES_Y - mapChipConfig_.MAPCHIP_VIEW_Y);
+}
+void MapChip::OnSelection()
+{
+	Point point = { 0,0 };
+	if (IsInMapChipArea(&point))
+	{
+		selectedChip.first = Point{ point.x + tipOffsetX_, point.y + tipOffsetY_ };
+		selectedChip.second = bgHandleMap[(point.y + tipOffsetY_) * mapChipConfig_.TILES_X + (point.x + tipOffsetX_)];
+		selectedChipVec.clear();
+		selectedChipVec.push_back(selectedChip);
+	}
+}
+void MapChip::OnRectSelection()
+{
+
+	selectedChipVec.clear();
+	RectSelect();
+	isUsedMapChip = false;
+
+}
+void MapChip::OnMiddleButtonDown()
+{
+	isUsedMapChip = true;	
+}
+
+void MapChip::OnMiddleButtonUp()
+{
+	selectedChipVec.clear();
+	RectSelect();
+	isUsedMapChip = false;
+}
+void MapChip::OnRightButtonDown()
+{
+	selectedChipVec.clear();
+}
 void MapChip::Draw()
 {
-#pragma region
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+#pragma region DrawImGui
 	ImGui::Text("selectedChip[%d,%d] : %d", selectedChip.first.x, selectedChip.first.y, selectedChip.second);
 
 	ImGui::BeginChild("selectedChipVec Viwer", ImVec2(0, 200), true, ImGuiWindowFlags_HorizontalScrollbar);
@@ -294,7 +380,6 @@ void MapChip::Draw()
 	}
 	ImGui::EndChild();
 
-	//ImGui::Separator();
 	ImGui::BeginChild("bgHandle Map Viwer", ImVec2(0, 200), true, ImGuiWindowFlags_HorizontalScrollbar);
 	
 	for (const auto bg : bgHandleMap)
@@ -304,11 +389,11 @@ void MapChip::Draw()
 	ImGui::EndChild();
 #pragma endregion
 	
-	
 	DrawMapChipWindow();
 	DrawMouseOverlapChip();
 	DrawSelectedChipFrame();
 	DrawSelectedChip();
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 }
 
 void MapChip::LoadIni()
@@ -336,27 +421,20 @@ bool MapChip::IsInMapChipArea(Point* point)
 	{
 		for (int x = 0; x < mapChipConfig_.MAPCHIP_VIEW_X;x++)
 		{
-			//int idx = (y) * mapChipConfig_.TILES_X + (x + tipOffsetX_);
-			//int idx = (y + tipOffsetY_) * mapChipConfig_.TILES_X + (x + tipOffsetX_);
+			
 			int idx = GetCorrectIndex(x, y);
 			if (idx < bgHandle.size())
 			{
 				int handle = bgHandle[idx];
-				//int handle = bgHandle[y * mapChipConfig_.TILES_X + (x + tipOffsetX_)];
 				if (handle != -1)
 				{
 					if (((mx - mapChipArea_.x) / mapChipConfig_.TILE_PIX_SIZE) == x && (my / mapChipConfig_.TILE_PIX_SIZE) == y)
-						//if (((mx - mapChipArea_.x) / mapChipConfig_.TILE_PIX_SIZE) == x + tipOffset_ && (my / mapChipConfig_.TILE_PIX_SIZE) == y)
 					{
 						point->x = x;
 						point->y = y;
 						ret = true;
 					}
 				}
-			}
-			else
-			{
-				int a = 0;
 			}
 		}
 	}
@@ -366,7 +444,7 @@ bool MapChip::IsInMapChipArea(Point* point)
 
 void MapChip::RectSelect()
 {
-	rect = Input::GetSelectRect();
+	rect = GetSelectRect();
 	int offsetX = rect.x - defaultMapChipArea_.x;
 	int offsetY = rect.y - defaultMapChipArea_.y;
 	gridRect =
@@ -382,7 +460,7 @@ void MapChip::RectSelect()
 		for (int j = gridRect.y; j <= gridRect.h; j++)
 		{
 			int idx = GetCorrectIndex(i, j);
-			if (idx >= 0 && idx < mapChipConfig_.MAPCHIP_VIEW_X * mapChipConfig_.MAPCHIP_VIEW_Y)
+			if (idx >= 0 && idx < mapChipConfig_.MAPCHIP_WIN_WIDTH * mapChipConfig_.MAPCHIP_WIN_HEIGHT)
 			{
 				Point p = { i,j };
 				int handle = bgHandle[idx];
@@ -406,13 +484,11 @@ int MapChip::GetHImage()
 		return -1;
 	}
 	return selectedChipVec.at(0).second;
-	//return selectedChip.second;
 }
 
 int MapChip::GetChipIndex(int handle)
 {
 #if 1
-	
 	return bgChipIndexMap[handle];
 #else
 	auto itr = bgChipIndexMap.find(handle);

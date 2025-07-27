@@ -15,6 +15,12 @@ private:
     //int* bgHandle;//背景画像のハンドルの配列へのポインタ
     int tipNum;
     int hImage;
+
+    void RegisterInputActions();
+    void OnPaint();
+    void OnFill();
+    void OnErase();
+    void OnEraseFill();
 public:
 
     Stage();
@@ -22,5 +28,7 @@ public:
     void Update() override;
     void Draw() override;
     int GetHImage();
+
+    
 };
 

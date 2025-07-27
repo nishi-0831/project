@@ -3,6 +3,7 @@
 #include "ImGui/imgui.h"
 #include <algorithm>
 #include "Input.h"
+#include "InputManager.h"
 #include <fstream>
 #include <map>
 #include "MapChip.h"
@@ -14,14 +15,15 @@
 
 namespace
 {
-	//std::map<int, int> myMapMap;
 	Point down = Point{0,0};
 	Point up = Point{ 0,0 };
-	//bool rectSelecting = false;
 	bool isUsedMapEdit = false;
 	Rect rect;
 	Rect gridRect;
 }
+
+using namespace Input;
+
 #define flag 1
 MapEdit::MapEdit()
 	: GameObject(), mapEditConfig_(GetMapEditConfig())
@@ -33,36 +35,53 @@ MapEdit::MapEdit()
 		mapEditConfig_.MAP_IMAGE_SIZE * mapEditConfig_.MAP_WIDTH + mapEditConfig_.LEFT_MARGIN,
 		mapEditConfig_.MAP_IMAGE_SIZE * mapEditConfig_.MAP_HEIGHT + mapEditConfig_.TOP_MARGIN
 	};
+	RegisterInputActions();
+	SetInputContextArea(mapEditArea_, InputContext::MAP_EDIT);
+	SetDrawOrder(1);
+
 }
 
 MapEdit::~MapEdit()
 {
 
 }
-
-void MapEdit::Update()
+void MapEdit::RegisterInputActions()
 {
-	if (Input::IsKeyDown(KEY_INPUT_S) && Input::IsKeepKeyDown(KEY_INPUT_LSHIFT))
-	{
-		SaveMapData();
-	}
-	if (Input::IsKeyDown(KEY_INPUT_L))
-	{
-		LoadMapData();
-	}
+	InputManager& inputManager = InputManager::GetInstance();
 
-	if (Input::IsButtonDown(Input::Mouse::MIDDLE))
+	InputBinding saveBinding = inputManager.CreateKeyBinding(KEY_INPUT_S, KEY_INPUT_LSHIFT);
+	RegisterAction("mapedit_save", saveBinding, InputActionType::PRESSED, InputContext::GENERAL,
+		[this]() {SaveMapData(); });
+	InputBinding loadBinding = inputManager.CreateKeyBinding(KEY_INPUT_L);
+	RegisterAction("mapedit_load", loadBinding, InputActionType::PRESSED, InputContext::GENERAL,
+		[this]() {LoadMapData(); });
+
+	InputBinding middleDownBinding;
+	middleDownBinding.mouseButton = Mouse::MIDDLE;
+	RegisterAction("mapedit_rect_start", middleDownBinding,InputActionType::PRESSED,InputContext::MAP_EDIT,
+		[this]() {OnMiddleButtonDown(); });
+
+	RegisterAction("mapedit_rect_end", middleDownBinding, InputActionType::RELEASED,
+		InputContext::MAP_EDIT, [this]() { OnMiddleButtonUp(); });
+}
+
+void MapEdit::OnMiddleButtonDown()
+{
+	if (IsButtonDown(Mouse::MIDDLE))
 	{
-		if (Input::IsMouseInRect(mapEditArea_))
+		if (IsMouseInRect(mapEditArea_))
 		{
 			isUsedMapEdit = true;
 		}
 	}
-	if (Input::IsButtonUp(Input::Mouse::MIDDLE))
+}
+void MapEdit::OnMiddleButtonUp()
+{
+	if (IsButtonUp(Mouse::MIDDLE))
 	{
 		if (isUsedMapEdit)
 		{
-			if (Input::IsKeepKeyDown(KEY_INPUT_LSHIFT))
+			if (IsKeepKeyDown(KEY_INPUT_LSHIFT))
 			{
 				RectFill(-1);
 			}
@@ -75,60 +94,53 @@ void MapEdit::Update()
 		}
 	}
 }
+void MapEdit::Update()
+{
+	
+}
 
 void MapEdit::Draw()
 {
 	ImGui::Begin("Rect");
 	
-	//rect = Input::GetSelectRect();
 	ImGui::Text("down(%i,%i)", down.x, down.y);
 	ImGui::Text("up(%i,%i)", up.x, up.y);
 	ImGui::Text("rect(%i,%i,%i,%i)", rect.x, rect.y, rect.w, rect.h);
 	ImGui::Text("gridRect(%i,%i,%i,%i)", gridRect.x, gridRect.y, gridRect.w, gridRect.h);
-	bool select = Input::IsSelectRect();
+	bool select = IsSelectRect();
 	ImGui::Checkbox("rectselecting", &select);
 	ImGui::Checkbox("isUsedMapEdit", &isUsedMapEdit);
 	ImGui::End();
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
-	if (isUsedMapEdit)
-	{
-		DrawSelectRect();
-
-	}
+	
 
 	int topLeftX = 0 + mapEditConfig_.LEFT_MARGIN;
 	int topLeftY = 0 + mapEditConfig_.TOP_MARGIN;
 	int bottomLightX = mapEditConfig_.MAP_IMAGE_SIZE * mapEditConfig_.MAP_WIDTH + mapEditConfig_.LEFT_MARGIN;
 	int bottomLightY = mapEditConfig_.MAP_IMAGE_SIZE * mapEditConfig_.MAP_HEIGHT + mapEditConfig_.TOP_MARGIN;
-	DrawBox(topLeftX, topLeftY, bottomLightX - 1, bottomLightY - 1, GetColor(122, 122, 122), FALSE, 3);
+	DrawBoxAA(topLeftX, topLeftY, bottomLightX - 1, bottomLightY - 1, GetColor(122, 122, 122), FALSE, 3);
 
 	for (int i = 1;i < mapEditConfig_.MAP_WIDTH;i++)
 	{
 		int x = i * mapEditConfig_.MAP_IMAGE_SIZE + mapEditConfig_.LEFT_MARGIN;
 
-		//起点のy
 		int startY = topLeftY;
-		//終点のy
 		int endY = bottomLightY;
 
 		DrawLine(x, startY, x, endY, GetColor(255, 0, 0), 1);
 	}
 	for (int i = 1;i < mapEditConfig_.MAP_HEIGHT;i++)
 	{
-		//起点も終点もyは同じ。横線だから
 		int y = i * mapEditConfig_.MAP_IMAGE_SIZE + mapEditConfig_.TOP_MARGIN;
 
-		//起点のx
 		int startX = topLeftX;
 		int endX = bottomLightX;
 
 		DrawLine(startX, y, endX, y, GetColor(255, 0, 0), 1);
 	}
 	Point p = { 0,1 };
-	//if (IsInMapEdit(p))
-	{
-		//DrawBox(mapEditArea_.x, mapEditArea_.y, mapEditArea_.w, mapEditArea_.h, GetColor(255, 0, 0), TRUE);
-	}
+	
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 	ImGui::Begin("MapEdit");
 	for (int y = 0; y < mapEditConfig_.MAP_HEIGHT;y++)
 	{
@@ -150,73 +162,22 @@ void MapEdit::Draw()
 
 void MapEdit::DrawSelectRect()
 {
-	rect = Input::GetSelectRect();
-	/*DrawBox(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h, GetColor(0, 200, 0), FALSE);*/
+	rect = GetSelectRect();
 }
-#if 0
-void MapEdit::SetSelectRect()
-{
-	//押し込んだ時の座標と、離した時の座標で矩形を作る
 
-	//小さい値を左/上とする
-
-
-	//押し込んだ時のxが左
-	if (down.x < up.x)
-	{
-		rect.x = down.x;
-		rect.w = up.x - down.x;
-	}
-	//離した時
-	else
-	{
-		rect.x = up.x;
-		rect.w = down.x - up.x;
-	}
-
-	///y
-	if (down.y < up.y)
-	{
-		rect.y = down.y;
-		rect.h = up.y - down.y;
-	}
-	//離した時
-	else
-	{
-		rect.y = up.y;
-		rect.h = down.y - up.y;
-	}
-}
-#endif
 void MapEdit::RectFill(int value)
 {
-	//SetSelectRect();
-	rect = Input::GetSelectRect();
+	rect = GetSelectRect();
+	int imageSize = mapEditConfig_.MAP_IMAGE_SIZE;
 	gridRect =
 	{
-		std::clamp((rect.x - mapEditConfig_.LEFT_MARGIN) / mapEditConfig_.MAP_IMAGE_SIZE,0,mapEditConfig_.MAP_WIDTH-1),
-		std::clamp((rect.y - mapEditConfig_.TOP_MARGIN) / mapEditConfig_.MAP_IMAGE_SIZE,0,mapEditConfig_.MAP_HEIGHT-1),
-		std::clamp((rect.x + rect.w - mapEditConfig_.LEFT_MARGIN) / mapEditConfig_.MAP_IMAGE_SIZE,0,mapEditConfig_.MAP_WIDTH-1),
-		std::clamp((rect.y + rect.h - mapEditConfig_.TOP_MARGIN) / mapEditConfig_.MAP_IMAGE_SIZE,0,mapEditConfig_.MAP_HEIGHT-1)
+		std::clamp((rect.x - mapEditConfig_.LEFT_MARGIN) / imageSize,0,mapEditConfig_.MAP_WIDTH - 1),
+		std::clamp((rect.y - mapEditConfig_.TOP_MARGIN) / imageSize,0,mapEditConfig_.MAP_HEIGHT - 1),
+		std::clamp((rect.x + rect.w - mapEditConfig_.LEFT_MARGIN) / imageSize,0,mapEditConfig_.MAP_WIDTH - 1),
+		std::clamp((rect.y + rect.h - mapEditConfig_.TOP_MARGIN) / imageSize,0,mapEditConfig_.MAP_HEIGHT - 1)
 	};
-	
 
-	
-	/*int i = gridRect.x;
-	while ((i <= gridRect.w && i < mapEditConfig_.MAP_WIDTH ) && i >= 0)
-	{
-		int j = gridRect.y;
-		while ((j <= gridRect.h && j < mapEditConfig_.MAP_HEIGHT ) && j >= 0)
-		{
-			int idx = i + (j * mapEditConfig_.MAP_WIDTH);
-			myMap_[idx] = value;
-			j++;
-		}
-		i++;
-	}*/
 
-	//領域を範囲外に送ると差分がでて左のほうに
-	// xがmapEditConfig_.MAP_WIDTH超えるとその分下の行に
 	for (int i = gridRect.x;i <= gridRect.w;i++)
 	{
 		for (int j = gridRect.y; j <= gridRect.h; j++)
@@ -386,17 +347,12 @@ void MapEdit::SaveMapData()
 		//それからofstreamを開く
 		std::ofstream openfile(filename);
 
-
-
 		printfDx("File Saved!!!\n");
 
 		std::ofstream file("data.dat");
 
 		openfile << "#TinyMapData\n";
 		//出力結果のファイル
-		//std::ofstream	file("data.dat");
-
-
 
 		MapChip* mc = FindGameObject<MapChip>();
 
@@ -445,18 +401,12 @@ void MapEdit::LoadMapData()
 	ifn.lpstrFilter = "全てのファイル (*.*)\0*.*\0";
 	ifn.lpstrFile = filename;
 	ifn.nMaxFile = 255;
-	//ifn.Flags = OFN_OVERWRITEPROMPT;
 
-	//ただファイル選択ダイアログが表示されるだけで、保存ボタンとか押してもなんも起きないよ
-
-	
 	//ファイル名はlpstrFileに渡したfilenameに入ってる
 	if (GetOpenFileName(&ifn))
 	{
 		printfDx("ファイルが選択された\n", filename);
-		//ファイルを開いて、セーブ
-		//std::filesystem ファイル名だけ取り出す
-		//ifstreamを開く input file stream
+		
 		std::ifstream inputfile(filename);
 		if (!inputfile)
 		{
@@ -477,8 +427,7 @@ void MapEdit::LoadMapData()
 					return;
 				}
 			}
-			//std::cerr << "error: failed to open file " << std::endl;
-			//一行ずつ
+			
 			myMap_.clear();
 			while (getline(inputfile, str_buf))
 			{
@@ -486,7 +435,6 @@ void MapEdit::LoadMapData()
 #if 1
 				//コンマ区切りで読み込みてえな
 				std::string data;
-				//std::istringstream stream(str_buf);
 
 				std::stringstream sstream(str_buf);
 
@@ -494,61 +442,16 @@ void MapEdit::LoadMapData()
 				{
 					int num;
 					num = std::stoi(data);
-					//printfDx("%i",num);
-					//printfDx(" ");
+					
 					myMap_.push_back(mc->GetChipHandle(num));
 				}
 #else
-				if (str_buf.empty()) continue;
-				if (str_buf[0] != '#')
-				{
-					std::istringstream iss(str_buf);
-					int tmp;
-					while (iss >> tmp)
-					{
-
-						myMap_.push_back(mc->GetChipHandle(tmp));
-					}
-				}
+				
 #endif
 				printfDx("\n");
 			}
-			//printfDx("File Saved!!!\n");
-			//出力結果のファイル
-			//std::ofstream	file("data.dat");
+			
 		}
-#if 0
-		inputfile << "#header" << std::endl;
-		inputfile << "WIDTH " << mapEditConfig_.MAP_WIDTH << std::endl;
-		inputfile << "HEIGHT " << mapEditConfig_.MAP_HEIGHT << std::endl;
-		inputfile << std::endl;
-		inputfile << "#data" << std::endl;
 
-		MapChip* mc = FindGameObject<MapChip>();
-
-		for (int y = 0; y < mapEditConfig_.mapEditConfig_.MAP_HEIGHT;y++)
-		{
-
-			for (int x = 0; x < mapEditConfig_.MAP_WIDTH;x++)
-			{
-				int index = -1;
-				int handle = myMap_[y * mapEditConfig_.MAP_WIDTH + x];
-				if (handle != -1)
-				{
-					index = mc->GetChipIndex(handle);
-				}
-				//ImGui::Text("myMap(%d,%d):%d", x, y, handle);
-				inputfile << index << ",";
-			}
-			inputfile << std::endl;
-		}
-		inputfile.close();
-	}
-	else
-	{
-		//ファイルの選択がキャンセル
-		printfDx("セーブがキャンセル\n");
-	}
-#endif
 	}
 }

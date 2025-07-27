@@ -2,8 +2,8 @@
 #include "DxLib.h"
 #include "bitset"
 #include "string"
-
-
+#include <unordered_map>
+#include <vector>
 namespace Input {
 	//キーボード取得関連
 	const int KEY_MAX = 255;
@@ -26,7 +26,10 @@ namespace Input {
 	static Rect rect;
 	static Point mousePos;
 
-
+	static InputContext currentContext = InputContext::GENERAL;
+	static std::unordered_map<std::string, InputAction> registeredActions;
+	static std::unordered_map<std::string, InputBinding> actionBindings;
+	static std::vector<ContextArea> contextAreas;
 }
 
 void Input::KeyStateUpdate()
@@ -160,6 +163,139 @@ const Point& Input::GetMousePos()
 	return mousePos;
 }
 
+void Input::InitializeInputSystem()
+{
+	registeredActions.clear();
+	actionBindings.clear();
+	currentContext = InputContext::GENERAL;
+}
+
+void Input::UpdateInputSystem()
+{
+	KeyStateUpdate();
+	UpdateInputActions();
+}
+
+void Input::SetInputContext(InputContext context)
+{
+	currentContext = context;
+}
+
+Input::InputContext Input::GetCurrentInputContext()
+{
+	return currentContext;
+}
+void Input::RegisterAction(const std::string& actionName, const InputBinding& binding, InputActionType type, InputContext context, std::function<void()> callback)
+{
+	InputAction action;
+	action.name = actionName;
+	action.type = type;
+	action.context = context;
+	action.callback = callback;
+
+	registeredActions[actionName] = action;
+	actionBindings[actionName] = binding;
+}
+
+void Input::EraseAction(const std::string& actionName)
+{
+	registeredActions.erase(actionName);
+	actionBindings.erase(actionName);
+}
+
+bool Input::IsInputTriggered(const InputBinding& binding, InputActionType type)
+{
+	bool triggered = false;
+
+	//キーの入力を調べる
+	if (binding.keyCode != -1)
+	{
+		//追加で押していなければいけないキーがあるかな
+		if (binding.requiresModifier && binding.modifierKey != -1)
+		{
+			if (!IsKeepKeyDown(binding.modifierKey))
+			{
+				return false;
+			}
+		}
+
+		switch (type)
+		{
+		case InputActionType::PRESSED:
+			triggered = IsKeyDown(binding.keyCode);
+			break;
+		case InputActionType::RELEASED:
+			triggered = IsKeyUp(binding.keyCode);
+			break;
+		case InputActionType::HELD:
+			triggered = IsKeepKeyDown(binding.keyCode);
+			break;
+		}
+	}
+
+	//マウスの入力を調べる
+	if (binding.mouseButton != -1)
+	{
+		//追加で押していなければいけないキーがあるかな
+		if (binding.requiresModifier && binding.modifierKey != -1)
+		{
+			if (!IsKeepKeyDown(binding.modifierKey))
+			{
+				return false;
+			}
+		}
+		switch (type)
+		{
+		case InputActionType::PRESSED:
+			triggered = IsButtonDown(binding.mouseButton);
+			break;
+		case InputActionType::RELEASED:
+			triggered = IsButtonUp(binding.mouseButton);
+			break;
+		case InputActionType::HELD:
+			triggered = IsButtonKeep(binding.mouseButton);
+			break;
+		}
+	}
+
+	return triggered;
+}
+void Input::UpdateInputActions()
+{
+	for (const auto& pair : registeredActions)
+	{
+		const InputAction& action = pair.second;
+
+		//現在の文脈と一般的な文脈のアクションだけ処理する
+		if (action.context != currentContext && action.context != InputContext::GENERAL)
+		{
+			continue;
+		}
+
+		//同じ名前がキーになってるInputBindingを探す
+		const InputBinding& binding = actionBindings[pair.first];
+
+		if (IsInputTriggered(binding, action.type))
+		{
+			action.callback();
+		}
+	}
+}
+void Input::UpdateContext()
+{
+	for (auto& contextArea : contextAreas)
+	{
+		if (IsMouseInRect(contextArea.area))
+		{
+			SetInputContext(contextArea.context);
+			break;
+		}
+	}
+}
+void Input::SetInputContextArea(const Rect& rect, InputContext context)
+{
+	contextAreas.push_back(ContextArea{ rect, context });
+}
 bool Input::IsKeyUp(int keyCode)
 {
 	return(key_up[keyCode]);

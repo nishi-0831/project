@@ -6,30 +6,22 @@
 #include "MapEditConfig.h"
 namespace
 {
-    //20かけ20で400、32のサイズのマスでグリッドを作る
     int MAP_WIDTH;
     int MAP_HEIGHT;
     int MAP_IMAGE_SIZE;
     int LEFT_MARGIN;
     int TOP_MARGIN;
-
-    /*
-    const int MAP_WIDTH = { 20 };
-    const int MAP_HEIGHT = { 20 };
-    const int MAP_IMAGE_SIZE = { 32 };
-    //今は使わない
-    const int LEFT_MARGIN = { 100 };
-    const int TOP_MARGIN = { 40 };
-    */
 }
 class MapEdit :
     public GameObject
 {
-    //格子模様書く
-    //ツールでエディットしたやつを持ってくる
     std::vector<int> myMap_;
 	Rect mapEditArea_;
     MapEditConfig mapEditConfig_;
+
+    void RegisterInputActions();
+    void OnMiddleButtonDown();
+    void OnMiddleButtonUp();
 public:
     MapEdit();
     ~MapEdit();
